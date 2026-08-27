@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>면접 리포트 | EGG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            font-family: 'Gowun Dodum', sans-serif;
+            background: radial-gradient(circle at 85% 7%, #fff1b9 0, #fff8d9 14%, transparent 33%), 
+                        linear-gradient(135deg, #fbfaf5 0%, #f6f6ed 52%, #edf4e6 100%);
+            color: #202a25;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 30px 6vw 55px;
+        }
+        
+        .eg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 42px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-family: 'Jua', sans-serif;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .egg-mark {
+            width: 22px;
+            height: 29px;
+            display: inline-block;
+            border-radius: 53% 47% 50% 50% / 45% 43% 57% 55%;
+            background: #f7c63e;
+            position: relative;
+        }
+        
+        .egg-mark:after {
+            content: '';
+            position: absolute;
+            width: 7px;
+            height: 8px;
+            top: 4px;
+            left: 6px;
+            border-radius: 50%;
+            background: #fff2bb;
+        }
+        
+        .motto {
+            background: #e7eddf;
+            color: #6a756a;
+            border-radius: 22px;
+            padding: 9px 16px;
+            font-size: 12px;
+        }
+        
+        .pill {
+            display: inline-block;
+            background: #e8f0df;
+            color: #4c6351;
+            border-radius: 16px;
+            padding: 6px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        h2, h3 {
+            font-family: 'Jua', sans-serif;
+            color: #202a25;
+            margin: 15px 0 10px;
+        }
+        
+        h2 {
+            font-size: 24px;
+        }
+        
+        h3 {
+            font-size: 18px;
+        }
+        
+        .caption {
+            color: #8a9289;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric {
+            background: #fffdf8;
+            border: 1px solid #e3e8de;
+            border-radius: 16px;
+            padding: 18px;
+            text-align: center;
+        }
+        
+        .metric b {
+            display: block;
+            font-family: 'Jua';
+            font-size: 30px;
+            color: #293d31;
+            margin-bottom: 8px;
+        }
+        
+        .insight {
+            background: #eaf1e4;
+            border-radius: 14px;
+            padding: 18px;
+            line-height: 1.7;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+        
+        .insight b {
+            color: #263c31;
+        }
+        
+        .feedback-list {
+            margin: 20px 0;
+        }
+        
+        .feedback-item {
+            background: #fff;
+            border: 1px solid #e3e8de;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .feedback-question {
+            font-weight: 600;
+            color: #263c31;
+            margin-bottom: 8px;
+        }
+        
+        .feedback-answer {
+            color: #667169;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .feedback-item.open .feedback-answer {
+            max-height: 200px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e3e8de;
+        }
+        
+        .feedback-info {
+            color: #758077;
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #eaf1e4;
+            border-radius: 8px;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        button {
+            border-radius: 11px;
+            border: 0;
+            background: #263c31;
+            color: white;
+            min-height: 44px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+        
+        button:hover {
+            background: #d98f13;
+        }
+        
+        @media (max-width: 768px) {
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('home') }}" style="text-decoration: none;">
+            <div class="eg-header">
+                <div class="brand">
+                    <div class="egg-mark"></div> 
+                    EGG 
+                    <div style="font-family: Gowun Dodum; font-size:11px; color:#778078; line-height:1.1;">
+                        Interview<br>Lab
+                    </div>
+                </div>
+                <div class="motto">나의 가능성을 한 단계 더 익히는 시간</div>
+            </div>
+        </a>
+        
+        <div>
+            <span class="pill">03 · 성장 확인</span>
+        </div>
+        
+        <h2>오늘의 면접 리포트</h2>
+        <div class="caption">{{ date }} 기준 · {{ profile.get('company', '관심 기업') }} / {{ profile.get('role', '관심 직무') }}</div>
+        
+        <div class="metrics">
+            <div class="metric">
+                <b>{{ readiness }}%</b>
+                <div>현재 준비도</div>
+            </div>
+            <div class="metric">
+                <b>{{ detail }}%</b>
+                <div>답변 상세도</div>
+            </div>
+            <div class="metric">
+                <b>{{ pass_rate }}%</b>
+                <div>예상 합격 가능성</div>
+            </div>
+        </div>
+        
+        <div class="insight">
+            <b>EGG 코치의 한마디</b>
+            경험의 재료는 충분히 모였어요. 답변마다 <b>내가 한 행동과 숫자로 보이는 결과</b>를 한 겹 더 얹으면 합격에 가까워져요.
+        </div>
+        
+        <h3>답변별 피드백</h3>
+        <div class="feedback-list">
+            {% for number, answer in answers | list | enumerate(1) %}
+            <div class="feedback-item" onclick="this.classList.toggle('open')">
+                <div class="feedback-question">Q{{ number }}. {{ answer.question[:60] }}...</div>
+                <div class="feedback-answer">
+                    <p>{{ answer.answer }}</p>
+                    <div class="feedback-info">
+                        질문의 의도에 맞게 경험을 연결했어요. 다음에는 결과를 수치로 구체화해 보세요.
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="button-group">
+            <a href="{{ url_for('interview_page') }}" style="text-decoration: none;">
+                <button>다시 한 번 연습하기</button>
+            </a>
+            <a href="{{ url_for('profile_page') }}" style="text-decoration: none;">
+                <button>프로필 보완하기</button>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Show first feedback item by default
+        if (document.querySelector('.feedback-item')) {
+            document.querySelector('.feedback-item').classList.add('open');
+        }
+    </script>
+</body>
+</html>

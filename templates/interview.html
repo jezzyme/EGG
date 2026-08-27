@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>면접 연습 | EGG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            font-family: 'Gowun Dodum', sans-serif;
+            background: radial-gradient(circle at 85% 7%, #fff1b9 0, #fff8d9 14%, transparent 33%), 
+                        linear-gradient(135deg, #fbfaf5 0%, #f6f6ed 52%, #edf4e6 100%);
+            color: #202a25;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 30px 6vw 55px;
+        }
+        
+        .eg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 42px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-family: 'Jua', sans-serif;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .egg-mark {
+            width: 22px;
+            height: 29px;
+            display: inline-block;
+            border-radius: 53% 47% 50% 50% / 45% 43% 57% 55%;
+            background: #f7c63e;
+            position: relative;
+        }
+        
+        .egg-mark:after {
+            content: '';
+            position: absolute;
+            width: 7px;
+            height: 8px;
+            top: 4px;
+            left: 6px;
+            border-radius: 50%;
+            background: #fff2bb;
+        }
+        
+        .motto {
+            background: #e7eddf;
+            color: #6a756a;
+            border-radius: 22px;
+            padding: 9px 16px;
+            font-size: 12px;
+        }
+        
+        .pill {
+            display: inline-block;
+            background: #e8f0df;
+            color: #4c6351;
+            border-radius: 16px;
+            padding: 6px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        h2 {
+            font-family: 'Jua', sans-serif;
+            color: #202a25;
+            font-size: 24px;
+            margin: 15px 0 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e3e8de;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: #263c31;
+            transition: width 0.3s ease;
+        }
+        
+        .insight {
+            background: #eaf1e4;
+            border-radius: 14px;
+            padding: 18px;
+            line-height: 1.7;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+        
+        .insight b {
+            display: block;
+            margin-bottom: 10px;
+            color: #263c31;
+        }
+        
+        .question-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #202a25;
+        }
+        
+        .caption {
+            color: #8a9289;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .form-group {
+            margin: 20px 0;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e3e8de;
+            border-radius: 8px;
+            font-family: 'Gowun Dodum', sans-serif;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.68);
+            min-height: 180px;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #d98f13;
+            box-shadow: 0 0 0 3px rgba(217, 143, 19, 0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 1px solid #e3e8de;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: 'Gowun Dodum', sans-serif;
+            font-size: 13px;
+            color: #8a9289;
+            position: relative;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            color: #263c31;
+        }
+        
+        .tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #263c31;
+        }
+        
+        button {
+            border-radius: 11px;
+            border: 0;
+            background: #263c31;
+            color: white;
+            min-height: 44px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-family: 'Gowun Dodum', sans-serif;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        button:hover {
+            background: #d98f13;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert-info {
+            background: #cfe2ff;
+            color: #084298;
+            border: 1px solid #b6d4fe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('home') }}" style="text-decoration: none;">
+            <div class="eg-header">
+                <div class="brand">
+                    <div class="egg-mark"></div> 
+                    EGG 
+                    <div style="font-family: Gowun Dodum; font-size:11px; color:#778078; line-height:1.1;">
+                        Interview<br>Lab
+                    </div>
+                </div>
+                <div class="motto">나의 가능성을 한 단계 더 익히는 시간</div>
+            </div>
+        </a>
+        
+        <div>
+            <span class="pill">실전 연습 {{ index + 1 }} / {{ total }}</span>
+            <span class="pill">{{ question.tag }}</span>
+        </div>
+        
+        <h2>{{ profile.get('company', '지원 기업') }} {{ profile.get('role', '지원 직무') }} 면접</h2>
+        
+        <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: {{ (index / total) * 100 }}%"></div>
+        </div>
+        
+        <div class="insight">
+            <b>EGG 코치의 질문</b>
+            <div class="question-text">{{ question.text }}</div>
+        </div>
+        
+        <div class="caption">답변 힌트: {{ question.tip }}</div>
+        
+        {% if error %}
+        <div class="alert alert-warning">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <textarea name="answer" placeholder="결론부터 말하고, 경험과 결과를 차례로 설명해 보세요."></textarea>
+            </div>
+            
+            <button type="submit">답변 제출</button>
+        </form>
+    </div>
+</body>
+</html>
