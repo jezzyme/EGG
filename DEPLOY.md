@@ -1,145 +1,150 @@
-# EGG 배포·운영 설정
+# EGG 배포 안내 (무료 Render + 외부 PostgreSQL)
 
-## 환경변수
+무료 호스팅은 **디스크가 배포·재시작마다 초기화**됩니다. 그래서 계정과 연습 기록은
+앱과 분리된 외부 데이터베이스에 저장합니다. 이렇게 해 두면 나중에 유료로 올려도 코드를 고칠 필요가 없습니다.
 
-| 변수 | 필수 | 설명 |
-|---|---|---|
-| `EGG_SECRET_KEY` | **필수** | 세션 서명 키. 없으면 프로세스마다 새로 생성되어 재시작 시 로그인이 풀립니다. `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `EGG_ENV` | 권장 | `production` 으로 두면 HTTPS 강제 + Secure 쿠키 + HSTS가 한 번에 켜집니다. |
-| `EGG_DB_PATH` | 권장 | SQLite 파일 경로. 재시작해도 유지되는 위치를 지정하세요. 기본값은 앱 폴더의 `egg.db`. |
-| `EGG_FORCE_HTTPS` | 선택 | HTTPS 강제를 개별 제어(`EGG_ENV`와 무관하게 on/off). |
-| `EGG_COOKIE_SECURE` | 선택 | Secure 쿠키를 개별 제어. |
-| `EGG_DEBUG` | 선택 | 개발용 디버거. **운영에서 절대 켜지 마세요**(원격 코드 실행 위험). |
-
-## 최소 운영 설정 예시
-
-```bash
-export EGG_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
-export EGG_ENV=production
-export EGG_DB_PATH=/var/lib/egg/egg.db
+```
+[사용자] → [Render 무료 웹서비스 : Flask]  →  [외부 PostgreSQL : 계정·연습 기록]
+                (재시작되면 초기화)              (그대로 남음)
 ```
 
-## 서버리스(Vercel) 주의
+로컬 개발은 설정 없이 지금처럼 SQLite 파일(`egg.db`)로 동작합니다.
 
-서버리스 함수는 파일 시스템이 요청마다 초기화됩니다. `EGG_DB_PATH`를 영구 볼륨이나
-외부 관리형 데이터베이스로 지정하지 않으면 계정과 기록이 남지 않습니다.
-일반 서버(가상머신, 컨테이너)나 영구 디스크가 있는 호스팅에서는 그대로 동작합니다.
+---
 
-## 비밀번호 재설정 링크
+## 1단계 · 데이터베이스 만들기 (무료)
 
-메일 발송 기능은 포함되어 있지 않습니다. 사용자가 재설정을 요청하면 링크가
-**서버 로그(WARNING)** 에만 기록되므로, 운영자가 확인해 전달하거나 SMTP 연동을 추가해야 합니다.
-화면에는 가입 여부와 무관하게 동일한 안내가 표시되어 계정 존재 여부가 드러나지 않습니다.
+[Neon](https://neon.tech) 에 가입해 프로젝트를 만들고 연결 문자열을 복사합니다.
 
-## 데이터 보관
+```
+postgresql://사용자:비밀번호@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+```
 
-- 계정(이메일·이름·비밀번호 해시)과 연습 기록이 `egg.db` 한 파일에 저장됩니다.
-- 파일 권한은 소유자 전용(600)으로 제한을 시도합니다. Windows에서는 POSIX 권한이 적용되지 않으므로
-  폴더 ACL로 직접 제한하세요.
-- 연습 기록은 사용자당 최근 30회까지 보관되며, 사용자가 마이페이지에서 개별·전체 삭제와 탈퇴를 할 수 있습니다.
-- 예전 `users.json` / `data/` 가 남아 있으면 첫 실행 시 자동으로 데이터베이스로 옮겨집니다(중복 없음).
+- 무료 용량 0.5GB — 이 앱 기준 계정 수천 개, 연습 기록 수만 건 규모
+- 쓰지 않을 때 자동으로 잠들고 접속하면 바로 깨어납니다
+- Supabase·Railway 등 다른 PostgreSQL도 동일하게 쓸 수 있습니다
+- **가입할 때 무료 요금제의 용량·보관 조건을 한 번 확인해 주세요** (업체 정책은 바뀝니다)
 
-## 구글 간편 로그인 설정
+## 2단계 · Render 웹 서비스 만들기
 
-구글 로그인은 `GOOGLE_CLIENT_ID` 와 `GOOGLE_CLIENT_SECRET` 이 있을 때만 켜집니다.
+1. [Render](https://render.com) → **New +** → **Web Service**
+2. GitHub 저장소 `jezzyme/EGG` 연결 (`render.yaml`이 있어 Blueprint로도 가능)
+3. 무료 플랜(Free) 선택
+4. 아래 환경변수를 넣습니다
+
+| 변수 | 값 | 비고 |
+|---|---|---|
+| `EGG_ENV` | `production` | HTTPS 강제·보안 쿠키·HSTS가 함께 켜집니다 |
+| `EGG_SECRET_KEY` | (자동 생성) | 로그인 세션 서명 키. Render의 **Generate** 사용 |
+| `EGG_DATABASE_URL` | 1단계에서 복사한 문자열 | **이 값이 없으면 데이터가 남지 않습니다** |
+| `EGG_BASE_URL` | `https://<서비스명>.onrender.com` | 메일·구글 링크를 이 주소로 만듭니다 |
+| `EGG_ALLOWED_HOSTS` | `<서비스명>.onrender.com` | 다른 주소로 온 요청을 거절합니다 |
+
+빌드·실행 명령은 `render.yaml`에 들어 있습니다.
+
+```
+빌드:  pip install -r requirements.txt
+실행:  gunicorn app_flask:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+```
+
+## 3단계 · 배포 확인
+
+1. `https://<서비스명>.onrender.com/healthz` 접속
+
+   ```json
+   {"ok": true, "backend": "postgres", "location": "PostgreSQL (외부 데이터베이스)"}
+   ```
+
+   `"backend": "sqlite"` 로 나오면 `EGG_DATABASE_URL`이 전달되지 않은 것입니다 — **이 상태로 쓰면 데이터가 사라집니다.**
+   `"ok": false` 면 `error` 항목에 원인이 적혀 있습니다.
+
+2. 회원가입 → 면접 1회 → 재배포(Manual Deploy) → 다시 로그인
+   **로그인이 유지되고 기록이 남아 있으면 정상입니다.**
+
+## 무료 플랜에서 알아 둘 점
+
+- **15분 동안 접속이 없으면 잠듭니다.** 다음 첫 접속이 30초~1분 걸립니다(데이터는 그대로).
+- 메모리 512MB — 그래서 `faster-whisper`(서버 음성 인식)는 설치하지 않습니다.
+  녹음 답변은 브라우저 음성 인식(Chrome·Edge)으로 처리되므로 기능에는 문제가 없습니다.
+- 업로드 상한 10MB는 그대로 동작합니다(Vercel은 4.5MB 제한이 있어 이 기능과 충돌합니다).
+
+## 선택 설정
+
+### 구글 간편 로그인
+
+| 변수 | 값 |
+|---|---|
+| `GOOGLE_CLIENT_ID` | 구글 클라우드 콘솔에서 발급 |
+| `GOOGLE_CLIENT_SECRET` | 같은 화면에서 발급 |
+
+구글 콘솔의 **승인된 리디렉션 URI**에 `https://<서비스명>.onrender.com/auth/google/callback` 을 추가해야 합니다.
 설정하지 않으면 버튼이 자동으로 숨겨지고 이메일 로그인만 동작합니다.
 
-### 1. 구글 클라우드 콘솔에서 발급
+### 비밀번호 재설정 메일
 
-1. https://console.cloud.google.com 접속 → 프로젝트 생성
-2. **API 및 서비스 → OAuth 동의 화면** → 사용자 유형 `외부` 선택 → 앱 이름(EGG), 지원 이메일 입력
-3. **API 및 서비스 → 사용자 인증 정보 → 사용자 인증 정보 만들기 → OAuth 클라이언트 ID**
-4. 애플리케이션 유형: **웹 애플리케이션**
-5. **승인된 리디렉션 URI** 에 아래 주소를 그대로 추가 (여기가 어긋나면 `redirect_uri_mismatch` 오류가 납니다)
+| 변수 | 예시 |
+|---|---|
+| `EGG_SMTP_HOST` | `smtp.gmail.com` |
+| `EGG_SMTP_PORT` | `587` (465면 SSL) |
+| `EGG_SMTP_USER` | `myaccount@gmail.com` |
+| `EGG_SMTP_PASSWORD` | Gmail은 **앱 비밀번호** |
+| `EGG_MAIL_FROM` | `no-reply@내도메인` |
 
-   | 환경 | 리디렉션 URI |
-   |---|---|
-   | 로컬 | `http://127.0.0.1:5000/auth/google/callback` |
-   | 배포 | `https://내도메인/auth/google/callback` |
+설정하지 않으면 재설정 링크가 서버 로그에만 남습니다(화면 안내는 동일해 가입 여부가 드러나지 않습니다).
 
-6. 만들어진 **클라이언트 ID / 보안 비밀번호**를 복사
+---
 
-### 2. 환경변수로 넣기
+## 나중에 유료로 올릴 때
+
+| 원하는 것 | 방법 |
+|---|---|
+| 잠들지 않게 하기 | Render 유료 플랜(Starter)으로 변경. 환경변수 그대로 |
+| 데이터 용량 늘리기 | Neon 유료 플랜으로 변경. 연결 문자열 그대로 |
+| SQLite로 돌아가기 | Render 디스크 추가 후 `EGG_DATABASE_URL` 삭제, `EGG_DB_PATH`를 디스크 경로로 지정 |
+
+코드 수정은 필요 없습니다.
+
+---
+
+## 로컬 실행
 
 ```bash
-export GOOGLE_CLIENT_ID="복사한-클라이언트-ID.apps.googleusercontent.com"
-export GOOGLE_CLIENT_SECRET="복사한-보안-비밀번호"
+pip install -r requirements.txt
+python run_local.py          # http://127.0.0.1:5000
 ```
 
-Windows PowerShell:
+`.env.local.example`을 `.env.local`로 복사해 값을 채우면 구글 로그인·메일도 로컬에서 시험할 수 있습니다.
 
-```powershell
-$env:GOOGLE_CLIENT_ID = "복사한-클라이언트-ID.apps.googleusercontent.com"
-$env:GOOGLE_CLIENT_SECRET = "복사한-보안-비밀번호"
-python run_local.py
-```
+## 보관되는 정보와 보호 방식
 
-### 동작 방식과 계정 연결 규칙
-
-- 표준 OAuth 2.0 Authorization Code 흐름을 사용하며, 인가 코드는 **서버가 구글과 직접 통신해** 토큰으로 바꿉니다(브라우저에 토큰이 노출되지 않습니다).
-- 위조 요청을 막기 위해 `state` 값을 세션에 저장해 대조하고, 한 번 쓴 값은 즉시 폐기합니다.
-- 구글이 이메일 소유를 확인해 주므로, **같은 이메일로 이미 가입한 계정이 있으면 그 계정에 구글 로그인이 연결**됩니다. 기존 비밀번호도 그대로 쓸 수 있습니다.
-- 이메일이 확인되지 않은(`email_verified: false`) 구글 계정은 기존 계정과 연결하지 않고 거부합니다.
-- 구글로만 가입한 계정은 비밀번호가 없습니다. 성장 기록 화면에서 **비밀번호 설정**을 하면 이메일 로그인도 함께 쓸 수 있습니다.
-- 액세스 토큰은 로그인 처리 후 버리며 저장하지 않습니다. 보관하는 것은 이메일·이름·구글 계정 식별자(sub)뿐입니다.
-
-## 자기소개서 파일 업로드
-
-프로필 화면에서 자기소개서를 파일로 올리면 글자만 뽑아 입력칸을 채웁니다.
-
-| 형식 | 처리 방식 | 필요한 패키지 |
-|---|---|---|
-| PDF | 페이지별 텍스트 추출(최대 40쪽) | `pypdf` |
-| DOCX | 내부 XML 직접 파싱 | 없음(표준 라이브러리) |
-| HWPX | 내부 XML 직접 파싱 | 없음(표준 라이브러리) |
-| HWP (한글 5.0) | OLE BodyText 스트림 해제 후 기록 해석 | `olefile` |
-| TXT | 인코딩 자동 판별(UTF-8 / CP949 / UTF-16) | 없음 |
-
-- 패키지는 `pip install -r requirements.txt` 로 함께 설치됩니다. 없으면 해당 형식만 안내 문구와 함께 비활성화됩니다.
-- 업로드 상한 10MB, 압축 해제 상한 60MB(압축 폭탄 방지), 보관 글자 수 상한 20,000자입니다.
-- 확장자와 실제 파일 내용(PDF 서명, ZIP 서명)을 함께 확인해 위장 파일을 거부합니다.
-- **올린 파일 자체는 저장하지 않습니다.** 글자만 뽑아 쓰고 즉시 버리며, 추출된 텍스트만 연습 기록에 남습니다.
-- 스캔 이미지 PDF처럼 글자가 없는 파일은 OCR을 하지 않고 안내 문구를 보여 줍니다.
-- 자바스크립트가 막힌 환경에서도 폼 전송 시 서버에서 한 번 더 추출하므로 업로드가 동작합니다.
-
-## 보안 설정 (운영 필수)
-
-| 변수 | 권장값 | 이유 |
-|---|---|---|
-| `EGG_BASE_URL` | `https://내도메인` | 비밀번호 재설정 링크·구글 콜백 주소를 **요청 헤더가 아닌 이 값으로** 만든다. 설정하지 않으면 `Host` 헤더를 그대로 쓰므로 위조된 링크가 만들어질 수 있다. |
-| `EGG_ALLOWED_HOSTS` | `내도메인,www.내도메인` | 다른 주소로 들어온 요청을 400으로 거절한다. |
-| `EGG_TRUST_PROXY_HOST` | 프록시가 `X-Forwarded-Host`를 직접 덮어쓸 때만 `1` | 기본은 신뢰하지 않는다(아무나 보낼 수 있는 헤더). |
-
-로컬 개발에서는 셋 다 비워 두면 된다(기본값으로 동작).
-
-## 메일 발송 설정 (비밀번호 재설정)
-
-아래 값을 넣으면 재설정 링크가 실제 메일로 나갑니다. 설정하지 않으면 링크가 서버 로그에만 남습니다
-(두 경우 모두 화면 안내는 동일해서 가입 여부가 드러나지 않습니다).
-
-| 변수 | 예시 | 설명 |
-|---|---|---|
-| `EGG_SMTP_HOST` | `smtp.gmail.com` | 메일 서버 |
-| `EGG_SMTP_PORT` | `587` | 465면 SSL로 접속 |
-| `EGG_SMTP_USER` | `myaccount@gmail.com` | 로그인 계정 |
-| `EGG_SMTP_PASSWORD` | (앱 비밀번호) | Gmail은 2단계 인증 후 발급하는 **앱 비밀번호**를 사용 |
-| `EGG_MAIL_FROM` | `no-reply@내도메인` | 보내는 사람. 없으면 `EGG_SMTP_USER` |
-| `EGG_SMTP_SSL` | `1` | 처음부터 SSL로 접속할 때 |
-
-메일 발송이 실패해도 사용자 화면은 그대로이고, 실패 사유와 링크는 서버 로그에 남습니다.
+- 계정(이름·이메일·비밀번호 해시), 연습 기록(프로필·답변·평가 결과)
+- 답변과 자기소개서는 브라우저 쿠키가 아닌 서버에만 저장
+- 업로드한 파일은 글자만 뽑은 뒤 즉시 폐기(저장하지 않음)
+- 녹음 파일도 분석 후 삭제
+- 연습 기록은 사용자당 최근 30회까지 보관, 사용자가 직접 삭제·탈퇴 가능
+- SQLite 파일은 소유자 전용 권한(POSIX 600 / Windows icacls)으로 제한
 
 ## 요청 횟수 제한
 
 | 대상 | 허용량 | 초과 시 |
 |---|---|---|
 | 로그인 실패 | 8회 / 5분 | 잠금 안내 |
-| 회원가입 시도 | 12회 / 10분 (IP 기준) | 잠시 후 재시도 안내 |
-| 자기소개서 파일 분석 | 30회 / 10분 (사용자 기준) | 429 + 안내 |
-| 비밀번호 재설정 요청 | 5회 / 1시간 | 안내는 동일, 실제 발송만 중단 |
+| 회원가입 시도 | 12회 / 10분 (IP) | 안내 |
+| 자기소개서 파일 분석 | 30회 / 10분 (사용자) | 429 + 안내 |
+| 비밀번호 재설정 | 5회 / 1시간 | 안내는 동일, 실제 발송만 중단 |
 
-기록은 데이터베이스에 남아 서버를 재시작하거나 워커가 여러 개여도 유지됩니다.
+## 환경변수 전체 목록
 
-## 파일 권한
-
-- Linux/macOS: `chmod 600`
-- Windows: `icacls`로 상속을 끊고 실행 계정에만 권한 부여 (Everyone·Users 권한 제거 확인됨)
+| 변수 | 필수 | 설명 |
+|---|---|---|
+| `EGG_SECRET_KEY` | ✅ | 세션 서명 키. 없으면 재시작 때 로그인이 풀립니다 |
+| `EGG_DATABASE_URL` | ✅(배포) | PostgreSQL 연결 문자열. 없으면 SQLite 파일 사용 |
+| `EGG_ENV` | 권장 | `production`이면 HTTPS 강제·보안 쿠키·HSTS |
+| `EGG_BASE_URL` | 권장 | 외부 링크(메일·구글 콜백) 생성 기준 주소 |
+| `EGG_ALLOWED_HOSTS` | 권장 | 허용할 접속 주소(쉼표 구분) |
+| `EGG_DB_PATH` | 선택 | SQLite 파일 경로 |
+| `EGG_DB_TIMEOUT` | 선택 | DB 연결 대기 초(기본 8) |
+| `EGG_FORCE_HTTPS` | 선택 | HTTPS 강제를 개별 제어 |
+| `EGG_COOKIE_SECURE` | 선택 | 보안 쿠키를 개별 제어 |
+| `EGG_TRUST_PROXY_HOST` | 선택 | 프록시가 `X-Forwarded-Host`를 덮어쓸 때만 `1` |
+| `EGG_DEBUG` | ❌ | 개발용. **운영에서 켜지 마세요**(원격 코드 실행 위험) |

@@ -27,6 +27,11 @@ if os.path.exists(ENV_FILE):
 from app_flask import app
 
 if __name__ == "__main__":
-    print("\n  EGG 실행 중 →  http://127.0.0.1:5000\n  (종료: Ctrl+C)\n")
+    import db
+    where = "외부 PostgreSQL" if db.USE_POSTGRES else "로컬 파일 %s" % db.db_path()
+    print("\n  EGG 실행 중 →  http://127.0.0.1:5000")
+    print("  데이터 저장: %s" % where)
+    print("  상태 확인:   http://127.0.0.1:5000/healthz")
+    print("  (종료: Ctrl+C)\n")
     # 코드를 고치면 자동으로 다시 불러온다(디버거는 켜지 않아 안전하다)
     app.run(host="127.0.0.1", port=5000, use_reloader=True)

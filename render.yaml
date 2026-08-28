@@ -1,0 +1,37 @@
+# Render 배포 설정 (무료 플랜)
+# 데이터는 외부 PostgreSQL 에 저장하므로, 무료 플랜의 디스크가 초기화돼도 유지된다.
+services:
+  - type: web
+    name: egg
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app_flask:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.9"
+      - key: EGG_ENV
+        value: production
+      - key: EGG_SECRET_KEY          # 로그인 세션 서명 키 (Render 가 자동 생성)
+        generateValue: true
+      - key: EGG_DATABASE_URL        # Neon 등 외부 PostgreSQL 연결 문자열
+        sync: false
+      - key: EGG_BASE_URL            # 예: https://egg.onrender.com
+        sync: false
+      - key: EGG_ALLOWED_HOSTS       # 예: egg.onrender.com
+        sync: false
+      # 선택 사항 — 필요할 때만 채운다
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: EGG_SMTP_HOST
+        sync: false
+      - key: EGG_SMTP_USER
+        sync: false
+      - key: EGG_SMTP_PASSWORD
+        sync: false
+      - key: EGG_MAIL_FROM
+        sync: false

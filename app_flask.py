@@ -71,8 +71,14 @@ app.config.update(
 )
 
 with app.app_context():
-    db.migrate_json()                             # 예전 JSON 파일이 있으면 한 번만 옮겨 온다
-    db.cleanup_expired()
+    try:
+        db.migrate_json()                         # 예전 JSON 파일이 있으면 한 번만 옮겨 온다
+        db.cleanup_expired()
+        app.logger.info("데이터 저장소 준비 완료 (%s)", db.backend())
+    except Exception as error:
+        # 연결 정보가 잘못되면 여기서 드러난다. 원인을 로그에 분명히 남긴다.
+        app.logger.error("데이터베이스에 연결하지 못했습니다: %s: %s", type(error).__name__, error)
+        app.logger.error("EGG_DATABASE_URL 값을 확인해 주세요. (/healthz 에서 상태를 볼 수 있습니다)")
 
 
 @app.before_request
@@ -586,6 +592,13 @@ def practice_stats(email):
 
 
 # ========== Routes ==========
+@app.route("/healthz")
+def healthz():
+    """배포 상태 확인용. 데이터베이스 연결 여부를 알려 준다."""
+    state = db.health()
+    return jsonify(state), (200 if state["ok"] else 503)
+
+
 @app.route("/")
 def home():
     email = current_email()

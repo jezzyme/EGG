@@ -53,7 +53,7 @@ def save_run(email, run):
     # 보관 개수를 넘으면 오래된 기록부터 지운다
     db.execute(
         "DELETE FROM runs WHERE email = ? AND id NOT IN ("
-        "  SELECT id FROM runs WHERE email = ? ORDER BY created_at DESC, rowid DESC LIMIT ?)",
+        "  SELECT id FROM runs WHERE email = ? ORDER BY created_at DESC, id DESC LIMIT ?)",
         (email, email, MAX_RUNS))
     return run["id"]
 
@@ -71,10 +71,10 @@ def latest_run(email, done=None):
         return None
     if done is None:
         row = db.query("SELECT payload FROM runs WHERE email = ?"
-                       " ORDER BY created_at DESC, rowid DESC LIMIT 1", (email,), one=True)
+                       " ORDER BY created_at DESC, id DESC LIMIT 1", (email,), one=True)
     else:
         row = db.query("SELECT payload FROM runs WHERE email = ? AND done = ?"
-                       " ORDER BY created_at DESC, rowid DESC LIMIT 1",
+                       " ORDER BY created_at DESC, id DESC LIMIT 1",
                        (email, 1 if done else 0), one=True)
     return _decode(row) if row else None
 
@@ -83,7 +83,7 @@ def list_runs(email):
     """마이페이지용 목록. 최근 기록이 앞에 온다."""
     if not email:
         return []
-    rows = db.query("SELECT payload FROM runs WHERE email = ? ORDER BY created_at DESC, rowid DESC",
+    rows = db.query("SELECT payload FROM runs WHERE email = ? ORDER BY created_at DESC, id DESC",
                     (email,))
     return [run for run in (_decode(row) for row in rows) if run]
 
