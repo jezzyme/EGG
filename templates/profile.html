@@ -1,237 +1,491 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 면접 재료 담기 | EGG</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            font-family: 'Gowun Dodum', sans-serif;
-            background: radial-gradient(circle at 85% 7%, #fff1b9 0, #fff8d9 14%, transparent 33%), 
-                        linear-gradient(135deg, #fbfaf5 0%, #f6f6ed 52%, #edf4e6 100%);
-            color: #202a25;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1050px;
-            margin: 0 auto;
-            padding: 30px 6vw 55px;
-        }
-        
-        .eg-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 42px;
-        }
-        
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            font-family: 'Jua', sans-serif;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        .egg-mark {
-            width: 22px;
-            height: 29px;
-            display: inline-block;
-            border-radius: 53% 47% 50% 50% / 45% 43% 57% 55%;
-            background: #f7c63e;
-            position: relative;
-        }
-        
-        .egg-mark:after {
-            content: '';
-            position: absolute;
-            width: 7px;
-            height: 8px;
-            top: 4px;
-            left: 6px;
-            border-radius: 50%;
-            background: #fff2bb;
-        }
-        
-        .motto {
-            background: #e7eddf;
-            color: #6a756a;
-            border-radius: 22px;
-            padding: 9px 16px;
-            font-size: 12px;
-        }
-        
-        h2 {
-            font-family: 'Jua', sans-serif;
-            color: #202a25;
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        
-        .caption {
-            color: #8a9289;
-            font-size: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #4c6351;
-        }
-        
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #e3e8de;
-            border-radius: 8px;
-            font-family: 'Gowun Dodum', sans-serif;
-            font-size: 13px;
-            background: rgba(255, 255, 255, 0.68);
-        }
-        
-        input[type="text"]:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #d98f13;
-            box-shadow: 0 0 0 3px rgba(217, 143, 19, 0.1);
-        }
-        
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-        
-        .cols {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        
-        button {
-            border-radius: 11px;
-            border: 0;
-            background: #263c31;
-            color: white;
-            min-height: 44px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 20px;
-            font-family: 'Gowun Dodum', sans-serif;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        button:hover {
-            background: #d98f13;
-        }
-        
-        button.back {
-            background: #758077;
-            margin-top: 10px;
-        }
-        
-        button.back:hover {
-            background: #5a6361;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .button-group button {
-            flex: 1;
-            margin-top: 0;
-        }
-        
-        .button-group .back {
-            margin-top: 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="{{ url_for('home') }}" style="text-decoration: none;">
-            <div class="eg-header">
-                <div class="brand">
-                    <div class="egg-mark"></div> 
-                    EGG 
-                    <div style="font-family: Gowun Dodum; font-size:11px; color:#778078; line-height:1.1;">
-                        Interview<br>Lab
-                    </div>
+{% extends "base.html" %}
+{% set active = 'practice' %}
+{% block title %}면접 재료 담기 | EGG{% endblock %}
+
+{% block head %}
+<style>
+    .upload-box {
+        border: 1px dashed var(--line-strong);
+        border-radius: var(--radius);
+        background: var(--yellow-mist);
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .upload-box.dragging {
+        border-color: var(--yellow);
+        background: #FDF3D8;
+    }
+
+    .upload-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: var(--yellow-soft);
+        display: grid;
+        place-items: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .upload-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .upload-main b {
+        font-size: 13.5px;
+        display: block;
+    }
+
+    .upload-main span {
+        font-size: 11.5px;
+        color: var(--ink-faint);
+    }
+
+    .upload-state {
+        font-size: 12px;
+        margin-top: 6px;
+        display: none;
+    }
+
+    .upload-state.on {
+        display: block;
+    }
+
+    .section-label {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--yellow-deep);
+        letter-spacing: 0.6px;
+        margin: 4px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .label-tip {
+        font-weight: 400;
+        color: var(--ink-faint);
+        font-size: 11px;
+        margin-left: 4px;
+    }
+
+    .hint.count {
+        color: #2F6B47;
+    }
+
+    .hint {
+        font-size: 11.5px;
+        line-height: 1.6;
+        margin-top: 6px;
+        color: var(--ink-faint);
+    }
+
+    .hint.bad {
+        color: var(--bad);
+    }
+
+    input.invalid {
+        border-color: var(--bad);
+        background: #FEF7F5;
+    }
+
+    .level-pick {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .level-pick label {
+        margin: 0;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius);
+        background: var(--paper);
+        padding: 13px 14px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .level-pick input {
+        display: none;
+    }
+
+    .level-pick b {
+        display: block;
+        font-size: 13.5px;
+        color: var(--ink);
+        margin-bottom: 3px;
+    }
+
+    .level-pick span {
+        font-size: 11px;
+        color: var(--ink-faint);
+        line-height: 1.5;
+    }
+
+    .level-pick input:checked + b {
+        color: var(--yellow-deep);
+    }
+
+    .level-pick label:has(input:checked) {
+        border-color: var(--yellow);
+        background: var(--yellow-mist);
+        box-shadow: 0 0 0 3px rgba(247, 201, 72, 0.18);
+    }
+
+    .upload-state.good { color: #2F6B47; }
+    .upload-state.bad  { color: var(--bad); }
+    .upload-state.busy { color: var(--yellow-deep); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="wrap wrap-narrow">
+    <div class="steps">
+        <div class="step on"><b>1</b> 프로필</div>
+        <div class="step-line"></div>
+        <div class="step"><b>2</b> 모의면접</div>
+        <div class="step-line"></div>
+        <div class="step"><b>3</b> 결과 분석</div>
+    </div>
+
+    <div class="card" style="padding: 34px 36px;">
+        <div class="eyebrow">Step 1</div>
+        <h2>나를 알려주세요</h2>
+        <p class="sub" style="margin-bottom: 26px;">입력한 정보가 구체적일수록 질문이 더 정교해져요.</p>
+
+        {% if error %}
+        <div class="note note-warn" style="margin-bottom: 20px;">
+            <span>⚠️</span><div>{{ error }}</div>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" id="profile-form">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+            <div class="section-label">인적사항</div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="school">학교</label>
+                    <input type="text" data-check="1" id="school" name="school" value="{{ form.get('school', '') }}" placeholder="예: 한국대학교">
+                    <div class="hint" id="hint-school">{{ hints.get('school') or "블라인드 면접을 위해 학교명은 질문에 사용하지 않아요." }}</div>
                 </div>
-                <div class="motto">나의 가능성을 한 단계 더 익히는 시간</div>
-            </div>
-        </a>
-        
-        <h2>나의 면접 재료 담기</h2>
-        <div class="caption">입력한 정보는 나에게 맞는 질문과 피드백을 만드는 데 사용돼요.</div>
-        
-        <form method="POST">
-            <div class="cols">
-                <div class="form-group">
-                    <label>학과 / 전공</label>
-                    <input type="text" name="department" placeholder="예: 경영학과">
-                </div>
-                <div class="form-group">
-                    <label>관심 기업</label>
-                    <input type="text" name="company" placeholder="예: 카카오">
+                <div class="field">
+                    <label for="gpa">학점</label>
+                    <input type="text" id="gpa" name="gpa" value="{{ form.get('gpa', '') }}" placeholder="예: 3.42 또는 3.42/4.5">
+                    <div class="hint" id="hint-gpa">{{ hints.get('gpa', '') }}</div>
                 </div>
             </div>
-            
-            <div class="cols">
-                <div class="form-group">
-                    <label>관심 직무</label>
-                    <input type="text" name="role" placeholder="예: 서비스 기획">
+
+            <div class="section-label">학업 · 경력</div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="department">전공 / 학과</label>
+                    <input type="text" data-check="1" id="department" name="department" value="{{ form.get('department', '') }}" placeholder="예: 경영학과 — 없으면 '없음'">
+                    <div class="hint" id="hint-department">{{ hints.get('department', '') }}</div>
                 </div>
-                <div class="form-group">
-                    <label>자격증</label>
-                    <input type="text" name="certificates" placeholder="예: ADsP, SQLD">
-                </div>
-            </div>
-            
-            <div class="cols">
-                <div class="form-group">
-                    <label>어학 성적</label>
-                    <input type="text" name="language" placeholder="예: TOEIC 890">
-                </div>
-                <div class="form-group">
-                    <label>인턴 · 대외활동 · 수상</label>
-                    <input type="text" name="activities" placeholder="예: 앱 공모전 대상">
+                <div class="field">
+                    <label for="double_major">복수 · 부 · 융합전공</label>
+                    <input type="text" data-check="1" id="double_major" name="double_major" value="{{ form.get('double_major', '') }}" placeholder="예: 통계학 복수전공 — 없으면 '없음'">
+                    <div class="hint" id="hint-double_major">{{ hints.get('double_major', '') }}</div>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label>자기소개서 또는 강조하고 싶은 경험</label>
-                <textarea name="cover_letter" placeholder="가장 자신 있는 경험을 자유롭게 적어주세요."></textarea>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="role">목표 직무</label>
+                    <input type="text" id="role" name="role" value="{{ form.get('role', '') }}" placeholder="예: 서비스 기획">
+                </div>
+                <div class="field">
+                    <label for="company">관심 기업</label>
+                    <input type="text" id="company" name="company" value="{{ form.get('company', '') }}" placeholder="예: 카카오">
+                </div>
             </div>
-            
-            <div class="button-group">
-                <button type="submit" style="flex: 2;">면접 재료 저장하고 질문 받기  →</button>
-                <a href="{{ url_for('home') }}" style="flex: 1; text-decoration: none;">
-                    <button class="back" type="button">← 돌아가기</button>
-                </a>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="certificates">자격증 <span class="label-tip">여러 개면 쉼표로 구분</span></label>
+                    <input type="text" data-check="1" id="certificates" name="certificates" value="{{ form.get('certificates', '') }}" placeholder="예: ADsP, 사회조사분석사 2급, 컴퓨터활용능력 2급">
+                    <div class="hint" id="hint-certificates">{{ hints.get('certificates', '') }}</div>
+                </div>
+                <div class="field">
+                    <label for="language">어학 성적</label>
+                    <input type="text" data-check="1" id="language" name="language" value="{{ form.get('language', '') }}" placeholder="예: TOEIC 890 — 없으면 '없음'">
+                    <div class="hint" id="hint-language">{{ hints.get('language', '') }}</div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="activities">인턴 · 대외활동 · 수상 <span class="label-tip">여러 개면 쉼표로 구분</span></label>
+                <input type="text" data-check="1" id="activities" name="activities" value="{{ form.get('activities', '') }}" placeholder="예: 앱 공모전 대상, 마케팅 인턴 6개월 — 없으면 '없음'">
+                <div class="hint" id="hint-activities">{{ hints.get('activities', '') }}</div>
+            </div>
+
+            <div class="field">
+                <label>면접 난이도</label>
+                <div class="level-pick">
+                    <label>
+                        <input type="radio" name="difficulty" value="기본" {{ 'checked' if difficulty == '기본' }}>
+                        <b>기본</b>
+                        <span>편안한 분위기로<br>차근차근 연습해요</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="difficulty" value="실전" {{ 'checked' if difficulty in (None, '실전') }}>
+                        <b>실전</b>
+                        <span>실제 면접처럼<br>적은 항목 위주로 물어요</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="difficulty" value="압박" {{ 'checked' if difficulty == '압박' }}>
+                        <b>압박</b>
+                        <span>비워 둔 항목까지<br>파고들어 물어요</span>
+                    </label>
+                </div>
+                <div class="hint">'없음'으로 적은 항목은 실전·기본에서는 묻지 않고, 압박에서는 준비하지 않은 이유를 묻습니다.</div>
+            </div>
+
+            <div class="field">
+                <label for="cover_letter">자기소개서 또는 강조하고 싶은 경험</label>
+                <textarea id="cover_letter" name="cover_letter"
+                          placeholder="파일로 올리거나 직접 붙여넣어 주세요. 상황 → 내가 한 행동 → 결과 순서로 적으면 질문이 더 날카로워져요.">{{ form.get('cover_letter', '') }}</textarea>
+                <div class="sub" style="margin-top:6px; text-align:right;">
+                    <span id="char-count">0</span>자
+                </div>
+            </div>
+
+            <div class="upload-box" id="upload-box">
+                <div class="upload-icon">📄</div>
+                <div class="upload-main">
+                    <b>자기소개서 파일을 올려 주세요</b>
+                    <span>PDF · DOCX · HWP · HWPX · TXT · 최대 10MB — 파일에서 글자를 읽어 위 칸에 채워 드려요.</span>
+                    <div class="upload-state" id="upload-state"></div>
+                </div>
+                <label class="btn btn-outline btn-sm" for="cover_letter_file" style="margin:0; cursor:pointer;">파일 선택</label>
+                <input type="file" id="cover_letter_file" name="cover_letter_file"
+                       accept="{{ accept }}" hidden>
+            </div>
+
+            <div class="note note-info" style="margin: 20px 0 22px;">
+                <span>✨</span>
+                <div><b class="t">EGG TIP</b> 해당 경험이 없는 칸은 비워 두지 말고 <b>'없음'</b>이라고 적어 주세요. 자격증·활동은 쉼표로 나눠 적으면 개수까지 인식합니다. 학교는 인적사항으로만 쓰고 <b>질문에는 나오지 않습니다</b>(블라인드 면접).</div>
+            </div>
+
+            <div class="btn-row" style="justify-content: space-between;">
+                <a class="btn btn-outline" href="{{ url_for('home') }}">← 돌아가기</a>
+                <button class="btn" type="submit">면접 시작하기 &nbsp;→</button>
             </div>
         </form>
     </div>
-</body>
-</html>
+
+    <div class="note note-plain" style="margin-top: 16px;">
+        <span>🔒</span>
+        <div>올린 파일은 글자만 읽어 낸 뒤 저장하지 않고 바로 버립니다. 읽어 낸 내용은 서버에만 보관되며, 성장 기록에서 언제든 삭제할 수 있어요.</div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const input = document.getElementById('cover_letter_file');
+    const box = document.getElementById('upload-box');
+    const state = document.getElementById('upload-state');
+    const textarea = document.getElementById('cover_letter');
+    const counter = document.getElementById('char-count');
+    const token = document.querySelector('input[name=_csrf]').value;
+
+    function updateCount() {
+        counter.textContent = textarea.value.length;   // 서버가 알려 주는 글자 수와 같은 기준
+    }
+    textarea.addEventListener('input', updateCount);
+    updateCount();
+
+    // ===== 경력 칸 입력 정리 =====
+    // 서버와 같은 규칙: 비었거나 '없다'는 뜻이면 '없음'으로 맞추고, 특수문자는 막는다
+    const NONE_WORDS = ['없음','없습니다','없어요','없슴','없다','없었음','없','무',
+                        '해당없음','해당사항없음','해당무','미보유','미해당','비해당',
+                        'x','xx','o','n','na','none','no','nothing','null','nil','0'];
+    const ALLOWED = /^[가-힣a-zA-Z0-9\s,.\/·()%+\-]*$/;
+    const SPECIAL_HINT = '특수문자는 입력할 수 없어요. 한글·영문·숫자로 적어 주세요.';
+    const NONE_HINT = "경험이 없으면 '없음'이라고 적어 주세요.";
+
+    const MULTI_FIELDS = ['certificates', 'activities', 'double_major'];
+
+    function stripQuotes(value) {
+        return (value || '').replace(/['‘’"“”`]/g, '');
+    }
+
+    function splitItems(value) {
+        return stripQuotes(value)
+                    .split(/[,\n·\/]+/)
+                    .map(function (part) { return part.replace(/\s+/g, ' ').trim(); })
+                    .filter(function (part) { return part.length > 0; });
+    }
+
+    function onlyWord(value) {
+        return value.replace(/[^가-힣a-zA-Z0-9]/g, '').toLowerCase();
+    }
+
+    function hintFor(field) {
+        return document.getElementById('hint-' + field.id);
+    }
+
+    function checkField(field, onBlur) {
+        const hint = hintFor(field);
+        // 서버와 같은 순서로: 따옴표를 먼저 떼어 내고 검사한다
+        const value = stripQuotes(field.value).trim();
+        if (onBlur && field.value !== value) field.value = value;
+        const bare = onlyWord(value);
+
+        if (!value) {
+            field.classList.remove('invalid');
+            if (hint) { hint.textContent = onBlur ? NONE_HINT : ''; hint.className = 'hint'; }
+            return true;
+        }
+
+        if (NONE_WORDS.indexOf(bare) !== -1 || bare === '') {   // 기호만 적은 경우도 '없음'
+            // '없음.' 처럼 특수문자가 붙은 경우 안내하고 '없음'으로 맞춘다
+            const hasSpecial = /[^가-힣a-zA-Z0-9]/.test(value.replace(/\s/g, ''));
+            if (hint) {
+                hint.textContent = hasSpecial ? SPECIAL_HINT : '';
+                hint.className = hasSpecial ? 'hint bad' : 'hint';
+            }
+            if (onBlur) {
+                field.value = '없음';
+                if (hint && hasSpecial) hint.textContent = SPECIAL_HINT + " '없음'으로 맞췄어요.";
+            }
+            field.classList.remove('invalid');
+            return true;
+        }
+
+        if (!ALLOWED.test(value)) {
+            field.classList.add('invalid');
+            if (hint) { hint.textContent = SPECIAL_HINT; hint.className = 'hint bad'; }
+            return false;
+        }
+
+        field.classList.remove('invalid');
+        if (hint) {
+            // 자격증·활동은 쉼표로 나눈 개수를 바로 알려 준다
+            const items = MULTI_FIELDS.indexOf(field.id) !== -1 ? splitItems(value) : [];
+            if (items.length > 1) {
+                hint.textContent = items.length + '개로 인식했어요: ' + items.join(' · ');
+                hint.className = 'hint count';
+            } else if (items.length === 1) {
+                hint.textContent = '1개로 인식했어요. 여러 개면 쉼표로 나눠 적어 주세요.';
+                hint.className = 'hint';
+            } else {
+                hint.textContent = '';
+                hint.className = 'hint';
+            }
+        }
+        return true;
+    }
+
+    // 학점은 숫자 형식만 확인한다
+    const gpaField = document.getElementById('gpa');
+    const gpaHint = document.getElementById('hint-gpa');
+    if (gpaField) {
+        gpaField.addEventListener('blur', function () {
+            const value = gpaField.value.trim();
+            if (!value) { gpaHint.textContent = ''; gpaHint.className = 'hint'; return; }
+            const numbers = value.match(/\d+(?:\.\d+)?/g);
+            if (!numbers) {
+                gpaField.classList.add('invalid');
+                gpaHint.textContent = "학점은 '3.42' 또는 '3.42/4.5'처럼 숫자로 적어 주세요.";
+                gpaHint.className = 'hint bad';
+                return;
+            }
+            gpaField.classList.remove('invalid');
+            const score = parseFloat(numbers[0]);
+            const scale = numbers[1] ? parseFloat(numbers[1]) : (score >= 40 ? 100 : 4.5);
+            const normalized = score / scale * 4.5;
+            if (score <= scale && normalized <= 3.5) {
+                gpaHint.textContent = '학점이 낮은 편이라 성실성을 확인하는 질문이 나올 수 있어요.';
+                gpaHint.className = 'hint';
+            } else {
+                gpaHint.textContent = '';
+                gpaHint.className = 'hint';
+            }
+        });
+    }
+
+    const checked = Array.prototype.slice.call(document.querySelectorAll('input[data-check]'));
+    checked.forEach(function (field) {
+        field.addEventListener('input', function () { checkField(field, false); });
+        field.addEventListener('blur', function () { checkField(field, true); });
+    });
+
+    document.getElementById('profile-form').addEventListener('submit', function (event) {
+        let firstBad = null;
+        checked.forEach(function (field) {
+            if (!checkField(field, true) && !firstBad) firstBad = field;
+        });
+        if (firstBad) {
+            event.preventDefault();
+            firstBad.focus();
+        }
+    });
+
+    function show(message, kind) {
+        state.textContent = message;
+        state.className = 'upload-state on ' + kind;
+    }
+
+    // 파일에서 글자를 읽어 텍스트 칸에 채운다(전송 전에 내용을 확인할 수 있게)
+    async function upload(file) {
+        if (!file) return;
+        show(file.name + ' 읽는 중…', 'busy');
+
+        const body = new FormData();
+        body.append('cover_letter_file', file);
+        body.append('_csrf', token);
+
+        try {
+            const response = await fetch('{{ url_for("extract_cover_letter") }}', { method: 'POST', body: body });
+            const result = await response.json();
+            if (!result.ok) {
+                show(result.error || '파일을 읽지 못했습니다.', 'bad');
+                return;
+            }
+            const existing = textarea.value.trim();
+            textarea.value = existing && existing !== result.text ? existing + '\n\n' + result.text : result.text;
+            updateCount();
+            show(result.filename + ' 에서 ' + result.chars + '자를 불러왔어요.' +
+                 (result.truncated ? ' (너무 길어 앞부분만 담았어요)' : ' 필요하면 위에서 직접 고칠 수 있어요.'), 'good');
+        } catch (e) {
+            show('파일을 올리지 못했습니다. 잠시 후 다시 시도해 주세요.', 'bad');
+        }
+    }
+
+    input.addEventListener('change', function () {
+        upload(input.files[0]);
+    });
+
+    // 끌어다 놓기
+    ['dragenter', 'dragover'].forEach(function (name) {
+        box.addEventListener(name, function (event) {
+            event.preventDefault();
+            box.classList.add('dragging');
+        });
+    });
+    ['dragleave', 'drop'].forEach(function (name) {
+        box.addEventListener(name, function (event) {
+            event.preventDefault();
+            box.classList.remove('dragging');
+        });
+    });
+    box.addEventListener('drop', function (event) {
+        const file = event.dataTransfer && event.dataTransfer.files[0];
+        if (!file) return;
+        try {
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            input.files = transfer.files;      // 자바스크립트가 막혀도 폼과 함께 전송되도록
+        } catch (e) { /* 브라우저가 막으면 아래 업로드만 진행 */ }
+        upload(file);
+    });
+})();
+</script>
+{% endblock %}

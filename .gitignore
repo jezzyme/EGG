@@ -25,3 +25,24 @@ wheels/
 .DS_Store
 *.log
 .vercel
+
+# 로컬 사용자 저장소 (비밀번호 해시 포함)
+users.json
+users.json.tmp
+
+# 사용자 연습 기록 (개인정보 포함)
+data/
+
+# SQLite 데이터베이스 (계정·연습 기록)
+egg.db
+egg.db-wal
+egg.db-shm
+
+# 로컬 세션 키
+.egg_secret
+
+# 로컬 환경변수 (구글 키 등)
+.env.local
+
+# 가상환경
+.venv/

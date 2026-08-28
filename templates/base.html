@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EGG{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/egg.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/eggy-sm.png') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    {% block chrome %}
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="logo" href="{{ url_for('home') }}">
+                <span class="logo-mark">E</span> EGG
+            </a>
+
+            <nav class="nav">
+                <a href="{{ url_for('home') }}" class="{{ 'active' if active == 'home' }}">홈</a>
+                <a href="{{ url_for('profile_page') }}" class="{{ 'active' if active in ('practice', 'interview') }}">모의면접</a>
+                <a href="{{ url_for('report_page') }}" class="{{ 'active' if active == 'report' }}">분석 리포트</a>
+                <a href="{{ url_for('mypage') }}" class="{{ 'active' if active == 'growth' }}">성장 기록</a>
+            </nav>
+
+            <div class="who">
+                {% if current_user %}
+                <span>{{ current_user.name }}</span>
+                <span class="avatar">{{ current_user.name[0] }}</span>
+                <a class="ghost-link" href="{{ url_for('logout') }}">로그아웃</a>
+                {% else %}
+                <a class="ghost-link" href="{{ url_for('login_page') }}">로그인</a>
+                <a class="btn btn-sm" href="{{ url_for('signup_page') }}">회원가입</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+    {% endblock %}
+
+    {% block body %}{% endblock %}
+
+    {% block foot %}
+    <div class="footer">
+        EGG · 답변에서 피드백, 피드백에서 다음 연습으로. 나의 가능성을 한 단계 더 익히는 시간.
+    </div>
+    {% endblock %}
+</body>
+</html>

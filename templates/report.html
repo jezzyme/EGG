@@ -1,297 +1,303 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>면접 리포트 | EGG</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            font-family: 'Gowun Dodum', sans-serif;
-            background: radial-gradient(circle at 85% 7%, #fff1b9 0, #fff8d9 14%, transparent 33%), 
-                        linear-gradient(135deg, #fbfaf5 0%, #f6f6ed 52%, #edf4e6 100%);
-            color: #202a25;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1050px;
-            margin: 0 auto;
-            padding: 30px 6vw 55px;
-        }
-        
-        .eg-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 42px;
-        }
-        
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            font-family: 'Jua', sans-serif;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        .egg-mark {
-            width: 22px;
-            height: 29px;
-            display: inline-block;
-            border-radius: 53% 47% 50% 50% / 45% 43% 57% 55%;
-            background: #f7c63e;
-            position: relative;
-        }
-        
-        .egg-mark:after {
-            content: '';
-            position: absolute;
-            width: 7px;
-            height: 8px;
-            top: 4px;
-            left: 6px;
-            border-radius: 50%;
-            background: #fff2bb;
-        }
-        
-        .motto {
-            background: #e7eddf;
-            color: #6a756a;
-            border-radius: 22px;
-            padding: 9px 16px;
-            font-size: 12px;
-        }
-        
-        .pill {
-            display: inline-block;
-            background: #e8f0df;
-            color: #4c6351;
-            border-radius: 16px;
-            padding: 6px 10px;
-            font-size: 12px;
-            margin-right: 5px;
-        }
-        
-        h2, h3 {
-            font-family: 'Jua', sans-serif;
-            color: #202a25;
-            margin: 15px 0 10px;
-        }
-        
-        h2 {
-            font-size: 24px;
-        }
-        
-        h3 {
-            font-size: 18px;
-        }
-        
-        .caption {
-            color: #8a9289;
-            font-size: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .metrics {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .metric {
-            background: #fffdf8;
-            border: 1px solid #e3e8de;
-            border-radius: 16px;
-            padding: 18px;
-            text-align: center;
-        }
-        
-        .metric b {
-            display: block;
-            font-family: 'Jua';
-            font-size: 30px;
-            color: #293d31;
-            margin-bottom: 8px;
-        }
-        
-        .insight {
-            background: #eaf1e4;
-            border-radius: 14px;
-            padding: 18px;
-            line-height: 1.7;
-            font-size: 14px;
-            margin: 20px 0;
-        }
-        
-        .insight b {
-            color: #263c31;
-        }
-        
-        .feedback-list {
-            margin: 20px 0;
-        }
-        
-        .feedback-item {
-            background: #fff;
-            border: 1px solid #e3e8de;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .feedback-item:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        
-        .feedback-question {
-            font-weight: 600;
-            color: #263c31;
-            margin-bottom: 8px;
-        }
-        
-        .feedback-answer {
-            color: #667169;
-            font-size: 13px;
-            line-height: 1.6;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        
-        .feedback-item.open .feedback-answer {
-            max-height: 200px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e3e8de;
-        }
-        
-        .feedback-info {
-            color: #758077;
-            font-size: 12px;
-            margin-top: 10px;
-            padding: 10px;
-            background: #eaf1e4;
-            border-radius: 8px;
-        }
-        
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        button {
-            border-radius: 11px;
-            border: 0;
-            background: #263c31;
-            color: white;
-            min-height: 44px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 20px;
-            font-family: 'Gowun Dodum', sans-serif;
-        }
-        
-        button:hover {
-            background: #d98f13;
-        }
-        
-        @media (max-width: 768px) {
-            .metrics {
-                grid-template-columns: 1fr;
-            }
-            
-            .button-group {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="{{ url_for('home') }}" style="text-decoration: none;">
-            <div class="eg-header">
-                <div class="brand">
-                    <div class="egg-mark"></div> 
-                    EGG 
-                    <div style="font-family: Gowun Dodum; font-size:11px; color:#778078; line-height:1.1;">
-                        Interview<br>Lab
-                    </div>
-                </div>
-                <div class="motto">나의 가능성을 한 단계 더 익히는 시간</div>
-            </div>
-        </a>
-        
-        <div>
-            <span class="pill">03 · 성장 확인</span>
+{% extends "base.html" %}
+{% set active = 'report' %}
+{% block title %}분석 리포트 | EGG{% endblock %}
+
+{% block head %}
+<style>
+    .report-hero {
+        padding: 38px 42px;
+    }
+
+    .report-hero .hero-mascot {
+        width: 176px;
+        margin-bottom: -38px;
+    }
+
+    .score-card {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+
+    .pass-bar {
+        height: 9px;
+        border-radius: 6px;
+        background: var(--cream-deep);
+        overflow: hidden;
+        margin-top: 14px;
+    }
+
+    .pass-fill {
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #F7C948, #E0A81F);
+    }
+
+    .big-rate {
+        font-size: 40px;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        line-height: 1.1;
+    }
+
+    .big-rate small {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--ink-soft);
+    }
+
+    .qa {
+        border-top: 1px solid var(--line);
+        padding: 16px 0;
+        cursor: pointer;
+    }
+
+    .qa:first-of-type {
+        border-top: 0;
+    }
+
+    .qa-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .qa-head .q {
+        flex: 1;
+        min-width: 0;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .qa-head .q span {
+        display: block;
+        font-size: 11.5px;
+        font-weight: 400;
+        color: var(--ink-faint);
+        margin-top: 3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .qa-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .qa.open .qa-body {
+        max-height: 900px;
+        margin-top: 16px;
+    }
+
+    .qa-answer {
+        background: var(--cream);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        font-size: 13px;
+        line-height: 1.8;
+        color: var(--ink-soft);
+    }
+
+    .qa-list {
+        margin-top: 12px;
+        font-size: 12.5px;
+        line-height: 1.9;
+        color: var(--ink-soft);
+    }
+
+    .qa-list b {
+        color: var(--ink);
+    }
+
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 900px) {
+        .score-card { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="wrap">
+    <section class="hero report-hero">
+        <div class="hero-copy">
+            <span class="chip-label">✨ AI 면접 분석 완료</span>
+            <h1 style="font-size: 30px;">
+                합격에 한 걸음 더
+                <span class="accent">가까워졌어요!</span>
+            </h1>
+            <p style="margin-bottom: 0;">
+                {{ date }} · {{ profile.get('company', '관심 기업') }} · {{ profile.get('role', '관심 직무') }}
+                {% if summary %} · {{ answers | length }}개 답변{% endif %}
+            </p>
         </div>
-        
-        <h2>오늘의 면접 리포트</h2>
-        <div class="caption">{{ date }} 기준 · {{ profile.get('company', '관심 기업') }} / {{ profile.get('role', '관심 직무') }}</div>
-        
-        <div class="metrics">
-            <div class="metric">
-                <b>{{ readiness }}%</b>
-                <div>현재 준비도</div>
-            </div>
-            <div class="metric">
-                <b>{{ detail }}%</b>
-                <div>답변 상세도</div>
-            </div>
-            <div class="metric">
-                <b>{{ pass_rate }}%</b>
-                <div>예상 합격 가능성</div>
-            </div>
+        <div class="hero-mascot">
+            <img src="{{ url_for('static', filename='img/eggy.png') }}" alt="EGG 마스코트 애기">
         </div>
-        
-        <div class="insight">
-            <b>EGG 코치의 한마디</b>
-            경험의 재료는 충분히 모였어요. 답변마다 <b>내가 한 행동과 숫자로 보이는 결과</b>를 한 겹 더 얹으면 합격에 가까워져요.
-        </div>
-        
-        <h3>답변별 피드백</h3>
-        <div class="feedback-list">
-            {% for number, answer in answers | list | enumerate(1) %}
-            <div class="feedback-item" onclick="this.classList.toggle('open')">
-                <div class="feedback-question">Q{{ number }}. {{ answer.question[:60] }}...</div>
-                <div class="feedback-answer">
-                    <p>{{ answer.answer }}</p>
-                    <div class="feedback-info">
-                        질문의 의도에 맞게 경험을 연결했어요. 다음에는 결과를 수치로 구체화해 보세요.
-                    </div>
+    </section>
+
+    <div class="grid-2" style="margin-top: 16px;">
+        <div class="card score-card">
+            <div style="flex:1;">
+                <div class="eyebrow">Overall Score</div>
+                <h3>종합 면접 점수</h3>
+                <p class="sub" style="margin-top:6px;">
+                    {% if summary %}
+                        {{ summary.voice_count }}개 녹음 · {{ summary.text_count }}개 텍스트 답변을 채점했어요.
+                    {% else %}
+                        답변을 제출하면 점수가 계산돼요.
+                    {% endif %}
+                </p>
+            </div>
+            {% set total = summary.total if summary else readiness %}
+            <div class="donut" style="background: conic-gradient(var(--yellow) {{ total * 3.6 }}deg, var(--cream-deep) 0deg);">
+                <div class="donut-inner">
+                    <b>{{ total }}</b>
+                    <span>/100{% if summary %} · {{ summary.grade }}{% endif %}</span>
                 </div>
             </div>
-            {% endfor %}
         </div>
-        
-        <div class="button-group">
-            <a href="{{ url_for('interview_page') }}" style="text-decoration: none;">
-                <button>다시 한 번 연습하기</button>
-            </a>
-            <a href="{{ url_for('profile_page') }}" style="text-decoration: none;">
-                <button>프로필 보완하기</button>
-            </a>
+
+        <div class="card">
+            <div class="eyebrow">Expected Pass Rate</div>
+            <h3>예상 합격 가능성</h3>
+            <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-top:10px;">
+                <div class="big-rate">{{ pass_rate }}<small>%</small></div>
+                <span class="badge {{ 'badge-good' if pass_rate >= 70 else ('badge-warn' if pass_rate >= 50 else 'badge-bad') }}">
+                    {% if pass_rate >= 70 %}합격권 근접{% elif pass_rate >= 50 %}조금만 더{% else %}보완 필요{% endif %}
+                </span>
+            </div>
+            <div class="pass-bar"><div class="pass-fill" style="width: {{ pass_rate }}%"></div></div>
+            <p class="sub" style="margin-top:10px;">
+                {% if summary and summary.reliability is defined %}{% endif %}
+                총점을 기준으로 환산한 값이며, 측정하지 못한 항목이 있으면 보수적으로 계산됩니다.
+            </p>
         </div>
     </div>
-    
-    <script>
-        // Show first feedback item by default
-        if (document.querySelector('.feedback-item')) {
-            document.querySelector('.feedback-item').classList.add('open');
-        }
-    </script>
-</body>
-</html>
+
+    {% if summary %}
+    <div class="card" style="margin-top: 14px;">
+        <div class="eyebrow">Answer Analysis</div>
+        <h3 style="margin-bottom: 6px;">답변 역량 분석</h3>
+        <p class="sub" style="margin-bottom: 18px;">
+            {% if summary.voice_count and summary.text_count %}
+                녹음은 <b>음성 채점표</b>, 텍스트는 <b>텍스트 채점표</b>로 채점했어요. 질문 적합도·내용 구체성은 두 채점표의 공통 항목입니다.
+            {% elif summary.voice_count %}
+                <b>음성 채점표</b>(내용 45% + 전달력 55%) 기준입니다.
+            {% else %}
+                <b>텍스트 채점표</b>(내용 60% + 문장 표현·분량 40%) 기준입니다. 녹음으로 답하면 전달력까지 평가돼요.
+            {% endif %}
+        </p>
+
+        {% for item in summary['items'] %}
+        <div class="bar-row">
+            <div class="bar-name">
+                {{ item.label }}
+                <span>{% if item.shared %}공통 항목{% else %}{{ summary.voice_count and '음성' or '텍스트' }} 전용{% endif %} · {{ item.count }}개 답변</span>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill {% if item.score < 60 %}low{% elif item.score < 78 %}mid{% endif %}" style="width: {{ item.score }}%"></div>
+            </div>
+            <div class="bar-score">{{ item.score }}</div>
+        </div>
+        {% endfor %}
+
+        {% if summary['unmeasured'] %}
+        <div class="note note-plain" style="margin-top: 16px;">
+            <span>ℹ️</span>
+            <div>측정값이 부족해 채점에서 제외한 항목: <b>{{ summary['unmeasured'] | join(', ') }}</b> — 점수를 추측하지 않고 나머지 항목으로 총점을 계산했어요.</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="grid-2" style="margin-top: 14px;">
+        <div class="note note-good" style="padding: 20px 22px;">
+            <span>🏆</span>
+            <div>
+                <b class="t">가장 잘한 점</b>
+                {% if summary.best %}<b style="color:#2F6B47;">{{ summary.best.label }} {{ summary.best.score }}점</b> — 이 강점은 다음 면접에서도 그대로 살려 보세요.{% else %}아직 채점된 항목이 없어요.{% endif %}
+            </div>
+        </div>
+        <div class="note note-info" style="padding: 20px 22px;">
+            <span>🎯</span>
+            <div>
+                <b class="t">다음 보완 과제</b>
+                {% if summary.worst %}<b>{{ summary.worst.label }} {{ summary.worst.score }}점</b> — 다음 연습에서 이 항목 하나만 집중해 보세요.{% endif %}
+                {% if summary.off_topic_count %}<br>질문과 어긋난 답변이 {{ summary.off_topic_count }}개 있었어요. 질문의 핵심 단어를 그대로 받아 결론부터 말해 보세요.{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-top: 14px;">
+        <div class="eyebrow">Question by Question</div>
+        <h3 style="margin-bottom: 14px;">답변별 피드백 <span class="sub" style="font-weight:400;">· 항목을 눌러 자세히 보기</span></h3>
+
+        {% for answer in answers %}
+        {% set number = loop.index %}
+        <div class="qa {{ 'open' if loop.first }}" onclick="this.classList.toggle('open')">
+            <div class="qa-head">
+                <span class="badge badge-soft">Q{{ number }}</span>
+                <div class="q">
+                    {{ answer.question[:52] }}{% if answer.question | length > 52 %}…{% endif %}
+                    <span>
+                        {{ answer.get('mode', '텍스트') }} 답변
+                        {% if answer.evaluation %} · {{ answer.evaluation.rubric }}{% endif %}
+                    </span>
+                </div>
+                {% if answer.evaluation and answer.evaluation.off_topic %}
+                <span class="badge badge-bad">동문서답 주의</span>
+                {% endif %}
+                {% if answer.evaluation %}
+                <div class="row-score">{{ answer.evaluation.total }}<span class="sub" style="font-weight:400;">점</span></div>
+                {% endif %}
+            </div>
+
+            {% if answer.evaluation %}
+            <div class="chips">
+                {% for item in answer.evaluation['items'] %}
+                {% if item.measured %}
+                <span class="badge {% if item.score < 60 %}badge-bad{% elif item.score < 78 %}badge-warn{% endif %}">{{ item.label }} {{ item.score }}</span>
+                {% else %}
+                <span class="badge badge-soft">{{ item.label }} 측정 불가</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="qa-body">
+                <div class="qa-answer">{{ answer.answer }}</div>
+                {% if answer.evaluation %}
+                <div class="qa-list">
+                    {% for item in answer.evaluation['items'] %}
+                    {% if item.measured %}
+                    <div>· <b>{{ item.label }} {{ item.score }}점</b> <span class="sub">(가중치 {{ item.weight }}%)</span> — {{ item.comment }}</div>
+                    {% else %}
+                    <div>· <b>{{ item.label }}</b> — {{ item.comment }} <span class="sub">({{ item.reason }})</span></div>
+                    {% endif %}
+                    {% endfor %}
+                    <div style="margin-top:8px;">이 답변 기준 예상 합격 가능성 <b>{{ answer.evaluation.pass_rate }}%</b></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if saved %}
+    <p class="sub" style="margin-top:16px; text-align:center;">이 리포트는 성장 기록에 저장되었어요. 언제든 다시 열어 보거나 삭제할 수 있습니다.</p>
+    {% endif %}
+
+    <div class="btn-row" style="justify-content:center; margin-top: 22px;">
+        <a class="btn btn-outline" href="{{ url_for('mypage') }}">📊 성장 기록 보기</a>
+        <a class="btn" href="{{ url_for('profile_page') }}">▷ 한 번 더 연습하기</a>
+    </div>
+</div>
+{% endblock %}

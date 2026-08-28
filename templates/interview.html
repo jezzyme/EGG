@@ -1,272 +1,918 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>면접 연습 | EGG</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            font-family: 'Gowun Dodum', sans-serif;
-            background: radial-gradient(circle at 85% 7%, #fff1b9 0, #fff8d9 14%, transparent 33%), 
-                        linear-gradient(135deg, #fbfaf5 0%, #f6f6ed 52%, #edf4e6 100%);
-            color: #202a25;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1050px;
-            margin: 0 auto;
-            padding: 30px 6vw 55px;
-        }
-        
-        .eg-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 42px;
-        }
-        
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            font-family: 'Jua', sans-serif;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        .egg-mark {
-            width: 22px;
-            height: 29px;
-            display: inline-block;
-            border-radius: 53% 47% 50% 50% / 45% 43% 57% 55%;
-            background: #f7c63e;
-            position: relative;
-        }
-        
-        .egg-mark:after {
-            content: '';
-            position: absolute;
-            width: 7px;
-            height: 8px;
-            top: 4px;
-            left: 6px;
-            border-radius: 50%;
-            background: #fff2bb;
-        }
-        
-        .motto {
-            background: #e7eddf;
-            color: #6a756a;
-            border-radius: 22px;
-            padding: 9px 16px;
-            font-size: 12px;
-        }
-        
-        .pill {
-            display: inline-block;
-            background: #e8f0df;
-            color: #4c6351;
-            border-radius: 16px;
-            padding: 6px 10px;
-            font-size: 12px;
-            margin-right: 5px;
-        }
-        
-        h2 {
-            font-family: 'Jua', sans-serif;
-            color: #202a25;
-            font-size: 24px;
-            margin: 15px 0 20px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e3e8de;
-            border-radius: 2px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: #263c31;
-            transition: width 0.3s ease;
-        }
-        
-        .insight {
-            background: #eaf1e4;
-            border-radius: 14px;
-            padding: 18px;
-            line-height: 1.7;
-            font-size: 14px;
-            margin: 20px 0;
-        }
-        
-        .insight b {
-            display: block;
-            margin-bottom: 10px;
-            color: #263c31;
-        }
-        
-        .question-text {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #202a25;
-        }
-        
-        .caption {
-            color: #8a9289;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        
-        .form-group {
-            margin: 20px 0;
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e3e8de;
-            border-radius: 8px;
-            font-family: 'Gowun Dodum', sans-serif;
-            font-size: 13px;
-            background: rgba(255, 255, 255, 0.68);
-            min-height: 180px;
-            resize: vertical;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #d98f13;
-            box-shadow: 0 0 0 3px rgba(217, 143, 19, 0.1);
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            border-bottom: 1px solid #e3e8de;
-        }
-        
-        .tab {
-            padding: 10px 15px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-family: 'Gowun Dodum', sans-serif;
-            font-size: 13px;
-            color: #8a9289;
-            position: relative;
-            font-weight: 600;
-        }
-        
-        .tab.active {
-            color: #263c31;
-        }
-        
-        .tab.active:after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #263c31;
-        }
-        
-        button {
-            border-radius: 11px;
-            border: 0;
-            background: #263c31;
-            color: white;
-            min-height: 44px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 20px;
-            font-family: 'Gowun Dodum', sans-serif;
-            width: 100%;
-            margin-top: 15px;
-        }
-        
-        button:hover {
-            background: #d98f13;
-        }
-        
-        .alert {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 13px;
-        }
-        
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .alert-info {
-            background: #cfe2ff;
-            color: #084298;
-            border: 1px solid #b6d4fe;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="{{ url_for('home') }}" style="text-decoration: none;">
-            <div class="eg-header">
-                <div class="brand">
-                    <div class="egg-mark"></div> 
-                    EGG 
-                    <div style="font-family: Gowun Dodum; font-size:11px; color:#778078; line-height:1.1;">
-                        Interview<br>Lab
+{% extends "base.html" %}
+{% set active = 'interview' %}
+{% block title %}모의면접 | EGG{% endblock %}
+
+{% block head %}
+<style>
+    .interview-top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 34px;
+    }
+
+    .back-round {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--paper);
+        border: 1px solid var(--line-strong);
+        display: grid;
+        place-items: center;
+        font-size: 15px;
+        color: var(--ink-soft);
+        flex-shrink: 0;
+    }
+
+    .interview-top .meta {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .interview-top .meta b {
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .interview-top .meta span {
+        display: block;
+        font-size: 12px;
+        color: var(--ink-faint);
+    }
+
+    .progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 12.5px;
+        color: var(--ink-faint);
+        font-weight: 700;
+    }
+
+    .progress .track {
+        width: 170px;
+        height: 6px;
+        border-radius: 4px;
+        background: var(--cream-deep);
+        overflow: hidden;
+    }
+
+    .progress .fill {
+        height: 100%;
+        background: var(--yellow);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .question-block {
+        text-align: center;
+        max-width: 760px;
+        margin: 0 auto 26px;
+    }
+
+    .speaker {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--paper);
+        border: 1px solid var(--line-strong);
+        display: grid;
+        place-items: center;
+        margin: 0 auto 16px;
+        font-size: 17px;
+    }
+
+    .question-text {
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1.6;
+        letter-spacing: -0.4px;
+        color: var(--ink);
+    }
+
+    .intent {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        background: var(--cream-deep);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        margin: 22px auto 0;
+        max-width: 760px;
+        text-align: left;
+        font-size: 12.5px;
+        color: var(--ink-soft);
+    }
+
+    .intent b {
+        display: block;
+        color: var(--ink);
+        margin-bottom: 2px;
+        font-size: 12.5px;
+    }
+
+    .answer-card {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .mode-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .mode-tab {
+        flex: 1;
+        border: 1px solid var(--line-strong);
+        background: var(--paper);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        text-align: center;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s ease;
+    }
+
+    .mode-tab b {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 3px;
+    }
+
+    .mode-tab span {
+        font-size: 11.5px;
+        color: var(--ink-faint);
+        line-height: 1.5;
+    }
+
+    .mode-tab.on {
+        border-color: var(--yellow);
+        background: var(--yellow-mist);
+        box-shadow: 0 0 0 3px rgba(247, 201, 72, 0.18);
+    }
+
+    .mode-tab .ico {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: var(--yellow-soft);
+        display: grid;
+        place-items: center;
+        margin: 0 auto 8px;
+        font-size: 15px;
+    }
+
+    .pane {
+        display: none;
+    }
+
+    .pane.on {
+        display: block;
+    }
+
+    /* ===== 녹음 영역 ===== */
+    .browser-note {
+        margin-bottom: 16px;
+    }
+
+    .voice-status {
+        display: block;
+        color: var(--ink-faint);
+        font-size: 12.5px;
+        line-height: 1.7;
+        margin-bottom: 16px;
+    }
+
+    .voice-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-record {
+        background: #D2503C;
+        color: #fff;
+    }
+
+    .btn-record:hover {
+        background: #B8412F;
+    }
+
+    .btn-record.recording {
+        animation: pulse 1.3s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(210, 80, 60, 0.4); }
+        50% { box-shadow: 0 0 0 9px rgba(210, 80, 60, 0); }
+    }
+
+    .rec-timer {
+        margin-left: auto;
+        font-weight: 800;
+        font-size: 15px;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .rec-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #D2503C;
+        margin-right: 7px;
+        visibility: hidden;
+    }
+
+    .rec-dot.on {
+        visibility: visible;
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        50% { opacity: 0.2; }
+    }
+
+    .level-meter {
+        position: relative;
+        height: 10px;
+        border-radius: 6px;
+        background: var(--cream-deep);
+        overflow: hidden;
+        margin-top: 18px;
+    }
+
+    .level-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #F7C948, #E0A81F);
+        transition: width 0.08s linear;
+    }
+
+    .level-zone {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 34%;
+        width: 30%;
+        border-left: 1px dashed var(--line-strong);
+        border-right: 1px dashed var(--line-strong);
+    }
+
+    .level-hint {
+        display: flex;
+        justify-content: space-between;
+        color: var(--ink-faint);
+        font-size: 11px;
+        margin-top: 7px;
+    }
+
+    audio {
+        width: 100%;
+        margin-top: 14px;
+    }
+
+    .voice-transcript {
+        margin-top: 14px;
+        background: var(--yellow-mist);
+        border: 1px solid #F5E6BF;
+        border-radius: var(--radius);
+        padding: 15px;
+        font-size: 13.5px;
+        line-height: 1.8;
+        min-height: 56px;
+        white-space: pre-wrap;
+    }
+
+    .voice-transcript .interim {
+        color: var(--ink-faint);
+    }
+
+    .voice-note {
+        margin-top: 12px;
+        color: var(--ink-faint);
+        font-size: 11.5px;
+        line-height: 1.7;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="wrap">
+    <div class="interview-top">
+        <a class="back-round" href="{{ url_for('home') }}">←</a>
+        <div class="meta">
+            <b>{{ profile.get('company', '지원 기업') }} · {{ profile.get('role', '지원 직무') }}</b>
+            <span>{{ difficulty }} 모드 · {{ question.tag }}</span>
+        </div>
+        <div class="progress">
+            <div class="track"><div class="fill" style="width: {{ ((index) / total * 100) | round }}%"></div></div>
+            {{ index + 1 }} / {{ total }}
+        </div>
+    </div>
+
+    <div class="question-block">
+        <div class="speaker">🔊</div>
+        <span class="badge">{{ question.tag }}</span>
+        <div class="question-text" style="margin-top: 14px;">"{{ question.text }}"</div>
+
+        <div class="intent">
+            <span>✨</span>
+            <div>
+                <b>질문 의도</b>
+                {{ question.tip }}
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="note note-warn answer-card" style="margin-bottom: 16px;">
+        <span>⚠️</span><div>{{ error }}</div>
+    </div>
+    {% endif %}
+
+    <form class="answer-card" method="POST" enctype="multipart/form-data" id="answer-form">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+        <div class="mode-tabs">
+            <button type="button" class="mode-tab on" data-pane="pane-text">
+                <div class="ico">✍️</div>
+                <b>텍스트로 답변</b>
+                <span>논리와 구조를 다듬어요</span>
+            </button>
+            <button type="button" class="mode-tab" data-pane="pane-voice">
+                <div class="ico">🎙️</div>
+                <b>음성으로 답변</b>
+                <span>실제처럼 말하며 전달력을 연습해요</span>
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="pane on" id="pane-text">
+                <textarea name="answer" placeholder="결론부터 말하고, 상황 → 내가 한 행동 → 결과 순서로 설명해 보세요."></textarea>
+                <div class="voice-note">텍스트 답변은 질문 적합도·내용 구체성·문장 가독성·분량으로 평가돼요.</div>
+                <button class="btn btn-block" type="submit" style="margin-top: 18px;">답변 제출 &nbsp;→</button>
+            </div>
+
+            <div class="pane" id="pane-voice">
+                <div class="note note-info browser-note" id="browser-note">
+                    <span>🌐</span>
+                    <div>
+                        <b class="t">Chrome 또는 Edge 사용을 권장합니다.</b>
+                        말한 내용을 실시간으로 글로 옮기는 기능(음성 인식)은 Chrome·Edge에서 가장 정확하게 동작합니다.
                     </div>
                 </div>
-                <div class="motto">나의 가능성을 한 단계 더 익히는 시간</div>
+
+                <span class="voice-status" id="voice-status">녹음하면 말한 내용이 자동으로 글로 옮겨지고, 목소리 크기·떨림·발음·답변 길이가 함께 측정됩니다.</span>
+
+                <div class="voice-controls">
+                    <button type="button" class="btn btn-record" id="btn-record">● 녹음 시작</button>
+                    <button type="button" class="btn btn-outline" id="btn-stop" disabled>■ 녹음 중지</button>
+                    <button type="button" class="btn btn-outline" id="btn-reset" disabled>다시 녹음</button>
+                    <span class="rec-timer"><span class="rec-dot" id="rec-dot"></span><span id="rec-timer">00:00</span></span>
+                </div>
+
+                <div class="level-meter"><div class="level-fill" id="level-fill"></div><div class="level-zone"></div></div>
+                <div class="level-hint"><span>작음</span><span id="level-hint">권장 구간</span><span>큼</span></div>
+
+                <audio id="voice-preview" controls hidden></audio>
+                <div class="voice-transcript" id="voice-transcript" hidden></div>
+
+                <input type="hidden" name="speech_transcript" id="speech-transcript">
+                <input type="hidden" name="voice_metrics" id="voice-metrics">
+                <input type="file" name="audio" id="audio-input" accept="audio/*" hidden>
+
+                <button class="btn btn-block" type="submit" name="input_mode" value="voice"
+                        id="btn-voice-submit" style="margin-top: 18px;" disabled>녹음 답변 제출 &nbsp;→</button>
+                <div class="voice-note" id="voice-note">마이크 사용 권한을 허용해 주세요. 녹음과 측정값은 답변 평가에만 사용됩니다.</div>
             </div>
-        </a>
-        
-        <div>
-            <span class="pill">실전 연습 {{ index + 1 }} / {{ total }}</span>
-            <span class="pill">{{ question.tag }}</span>
         </div>
-        
-        <h2>{{ profile.get('company', '지원 기업') }} {{ profile.get('role', '지원 직무') }} 면접</h2>
-        
-        <div class="progress-bar">
-            <div class="progress-bar-fill" style="width: {{ (index / total) * 100 }}%"></div>
-        </div>
-        
-        <div class="insight">
-            <b>EGG 코치의 질문</b>
-            <div class="question-text">{{ question.text }}</div>
-        </div>
-        
-        <div class="caption">답변 힌트: {{ question.tip }}</div>
-        
-        {% if error %}
-        <div class="alert alert-warning">{{ error }}</div>
-        {% endif %}
-        
-        <form method="POST">
-            <div class="form-group">
-                <textarea name="answer" placeholder="결론부터 말하고, 경험과 결과를 차례로 설명해 보세요."></textarea>
-            </div>
-            
-            <button type="submit">답변 제출</button>
-        </form>
+    </form>
+
+    <div class="sub" style="text-align:center; margin-top:18px;">
+        권장 답변 길이는 40~95초예요. 두 방식 중 편한 쪽을 골라 답하면 됩니다.
     </div>
-</body>
-</html>
+</div>
+
+<script>
+(function () {
+    // 같은 답변이 두 번 저장되지 않도록 제출 버튼을 한 번만 누르게 한다
+    const form = document.getElementById('answer-form');
+    if (form) {
+        form.addEventListener('submit', function () {
+            form.querySelectorAll('button[type=submit]').forEach(function (button) {
+                button.disabled = true;
+                button.textContent = '제출 중…';
+            });
+        });
+    }
+
+    // 텍스트 / 음성 탭 전환
+    document.querySelectorAll('.mode-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.mode-tab').forEach(function (other) { other.classList.remove('on'); });
+            document.querySelectorAll('.pane').forEach(function (pane) { pane.classList.remove('on'); });
+            tab.classList.add('on');
+            document.getElementById(tab.dataset.pane).classList.add('on');
+        });
+    });
+})();
+</script>
+
+        <script>
+        (function () {
+            const recordBtn = document.getElementById('btn-record');
+            const stopBtn = document.getElementById('btn-stop');
+            const resetBtn = document.getElementById('btn-reset');
+            const submitBtn = document.getElementById('btn-voice-submit');
+            const statusEl = document.getElementById('voice-status');
+            const noteEl = document.getElementById('voice-note');
+            const timerEl = document.getElementById('rec-timer');
+            const dotEl = document.getElementById('rec-dot');
+            const previewEl = document.getElementById('voice-preview');
+            const transcriptEl = document.getElementById('voice-transcript');
+            const transcriptField = document.getElementById('speech-transcript');
+            const metricsField = document.getElementById('voice-metrics');
+            const audioInput = document.getElementById('audio-input');
+            const meterFill = document.getElementById('level-fill');
+            const meterHint = document.getElementById('level-hint');
+
+            if (!navigator.mediaDevices || !window.MediaRecorder) {
+                recordBtn.disabled = true;
+                statusEl.textContent = '이 브라우저는 녹음을 지원하지 않습니다. 텍스트로 답변해 주세요.';
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+            // 받아쓰기를 지원하지 않는 브라우저에는 권장 안내를 경고로 바꿔 먼저 알려 준다
+            const browserNote = document.getElementById('browser-note');
+            if (!SpeechRecognition && browserNote) {
+                browserNote.className = 'browser-note warn';
+                browserNote.innerHTML = '<span>⚠️</span><div><b class=\"t\">이 브라우저는 실시간 받아쓰기를 지원하지 않습니다.</b>' +
+                    'Chrome 또는 Edge에서 열면 말한 내용이 자동으로 글로 옮겨집니다. ' +
+                    '지금 브라우저에서도 녹음과 목소리 분석은 가능하지만, 답변 텍스트는 서버 음성 인식에 의존합니다.</div>';
+            }
+            const FRAME_MS = 50;
+            const SNR_SPEECH = 8;        // 소음 바닥보다 이만큼 크면 발화로 본다(dB)
+            const DROPOUT_DB = 12;       // 자기 평균보다 이만큼 작아지면 목소리가 꺼진 구간
+            const PAUSE_FRAMES = 30;     // 1.5초 이상 이어진 침묵
+            const CALIB_FRAMES = 14;     // 녹음 시작 직후 0.7초는 주변 소음 측정에 쓴다
+            const WINDOW_FRAMES = 20;    // 1초 창마다 최솟값을 모아 소음 바닥을 추정한다
+
+            let recognition = null;
+            let recorder = null;
+            let stream = null;
+            let chunks = [];
+            let finalText = '';
+            let interimText = '';
+            let timerId = null;
+            let seconds = 0;
+
+            let audioCtx = null;
+            let analyser = null;
+            let sourceNode = null;
+            let frameBuffer = null;
+            let freqBuffer = null;
+            let sampleTimer = null;
+            let levels = [];             // 프레임별 RMS(선형)
+            let pitches = [];            // 프레임별 기본주파수(무성음은 0)
+            let highs = [];              // 프레임별 2kHz 이상 에너지 비율
+            let liveFloor = null;        // 실시간 미터용 소음 바닥 추정치
+            let confidenceSum = 0;
+            let confidenceCount = 0;
+
+            function formatTime(total) {
+                const m = String(Math.floor(total / 60)).padStart(2, '0');
+                const s = String(total % 60).padStart(2, '0');
+                return m + ':' + s;
+            }
+
+            function toDb(linear) {
+                return 20 * Math.log10(Math.max(linear, 1e-8));
+            }
+
+            function round(value, digits) {
+                const factor = Math.pow(10, digits);
+                return Math.round(value * factor) / factor;
+            }
+
+            function quantile(sortedValues, q) {
+                if (!sortedValues.length) return null;
+                const pos = (sortedValues.length - 1) * q;
+                const base = Math.floor(pos);
+                const rest = pos - base;
+                const next = sortedValues[base + 1];
+                return next === undefined ? sortedValues[base] : sortedValues[base] + rest * (next - sortedValues[base]);
+            }
+
+            function renderTranscript() {
+                transcriptField.value = finalText.trim();
+                if (!finalText && !interimText) {
+                    transcriptEl.hidden = true;
+                    transcriptEl.textContent = '';
+                    return;
+                }
+                transcriptEl.hidden = false;
+                transcriptEl.textContent = finalText;
+                if (interimText) {
+                    const span = document.createElement('span');
+                    span.className = 'interim';
+                    span.textContent = interimText;
+                    transcriptEl.appendChild(span);
+                }
+            }
+
+            // ===== 음향 측정 =====
+            function detectPitch(buf, sampleRate) {
+                let power = 0;
+                for (let i = 0; i < buf.length; i++) power += buf[i] * buf[i];
+                const rms = Math.sqrt(power / buf.length);
+                if (rms < 0.006) return 0;
+
+                const minLag = Math.floor(sampleRate / 400);
+                const maxLag = Math.floor(sampleRate / 70);
+                let bestLag = -1;
+                let bestCorr = 0;
+                for (let lag = minLag; lag <= maxLag; lag++) {
+                    let corr = 0;
+                    for (let i = 0; i < buf.length - lag; i += 2) corr += buf[i] * buf[i + lag];
+                    corr = (2 * corr) / (buf.length - lag);
+                    if (corr > bestCorr) {
+                        bestCorr = corr;
+                        bestLag = lag;
+                    }
+                }
+                if (bestLag < 0 || bestCorr < rms * rms * 0.35) return 0;
+                return sampleRate / bestLag;
+            }
+
+            // 자음이 뭉개지면 고역 에너지 비율이 떨어진다(발음 선명도 보조 지표)
+            function highFrequencyRatio(sampleRate) {
+                analyser.getFloatFrequencyData(freqBuffer);
+                const binHz = sampleRate / analyser.fftSize;
+                const topBin = Math.min(freqBuffer.length, Math.floor(8000 / binHz));
+                const splitBin = Math.floor(2000 / binHz);
+                let total = 0;
+                let high = 0;
+                for (let i = 1; i < topBin; i++) {
+                    const linear = Math.pow(10, freqBuffer[i] / 20);
+                    total += linear;
+                    if (i >= splitBin) high += linear;
+                }
+                return total > 0 ? high / total : null;
+            }
+
+            function updateMeter(rms) {
+                // 절대 음량 대신 '소음 대비 얼마나 큰지'를 보여 준다(기기 차이를 줄임)
+                if (liveFloor === null) liveFloor = rms;
+                liveFloor = rms < liveFloor ? (liveFloor * 0.8 + rms * 0.2) : (liveFloor * 0.995 + rms * 0.005);
+                const snr = toDb(rms) - toDb(liveFloor);
+                const percent = Math.max(0, Math.min(100, (snr / 40) * 100));
+                meterFill.style.width = percent + '%';
+                if (snr < 10) meterHint.textContent = '조금 더 크게';
+                else if (snr > 36) meterHint.textContent = '조금 작게';
+                else meterHint.textContent = '좋은 음량';
+            }
+
+            function startAnalysis(mediaStream) {
+                if (!AudioContextClass) return;
+                try {
+                    audioCtx = new AudioContextClass();
+                    sourceNode = audioCtx.createMediaStreamSource(mediaStream);
+                    analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 2048;
+                    analyser.smoothingTimeConstant = 0;
+                    sourceNode.connect(analyser);
+                    frameBuffer = new Float32Array(analyser.fftSize);
+                    freqBuffer = new Float32Array(analyser.frequencyBinCount);
+                } catch (e) {
+                    audioCtx = null;
+                    return;
+                }
+                sampleTimer = setInterval(function () {
+                    analyser.getFloatTimeDomainData(frameBuffer);
+                    let power = 0;
+                    for (let i = 0; i < frameBuffer.length; i++) power += frameBuffer[i] * frameBuffer[i];
+                    const rms = Math.sqrt(power / frameBuffer.length);
+                    levels.push(rms);
+                    pitches.push(detectPitch(frameBuffer, audioCtx.sampleRate));
+                    highs.push(highFrequencyRatio(audioCtx.sampleRate));
+                    updateMeter(rms);
+                }, FRAME_MS);
+            }
+
+            function stopAnalysis() {
+                clearInterval(sampleTimer);
+                sampleTimer = null;
+                if (sourceNode) { try { sourceNode.disconnect(); } catch (e) {} sourceNode = null; }
+                if (audioCtx) { try { audioCtx.close(); } catch (e) {} audioCtx = null; }
+                analyser = null;
+                liveFloor = null;
+                meterFill.style.width = '0%';
+                meterHint.textContent = '권장 구간';
+            }
+
+            // 소음 바닥 추정. 녹음 첫 구간(말하기 전)과 1초 창별 최솟값을 함께 본다.
+            // 쉬는 구간이 거의 없는 녹음에서도 배경 소음을 잡아내기 위한 이중 추정이다.
+            function estimateNoiseFloor(dbs) {
+                const calibration = dbs.slice(0, Math.min(CALIB_FRAMES, dbs.length))
+                                       .sort(function (a, b) { return a - b; });
+                const calibrated = quantile(calibration, 0.5);
+
+                const minima = [];
+                for (let start = 0; start < dbs.length; start += WINDOW_FRAMES) {
+                    let lowest = Infinity;
+                    for (let i = start; i < Math.min(start + WINDOW_FRAMES, dbs.length); i++) {
+                        if (dbs[i] < lowest) lowest = dbs[i];
+                    }
+                    if (isFinite(lowest)) minima.push(lowest);
+                }
+                minima.sort(function (a, b) { return a - b; });
+                const statistical = quantile(minima, 0.2);
+
+                if (calibrated === null) return statistical;
+                if (statistical === null) return calibrated;
+                return Math.min(calibrated, statistical);
+            }
+
+            function buildMetrics(duration) {
+                const metrics = { duration: round(duration, 1), frames: levels.length };
+                if (confidenceCount) {
+                    metrics.confidence = round(confidenceSum / confidenceCount, 3);
+                    metrics.confidence_samples = confidenceCount;
+                }
+                if (!levels.length) return metrics;
+
+                const dbs = levels.map(toDb);
+                const noiseDb = estimateNoiseFloor(dbs);
+                const threshold = Math.max(noiseDb + SNR_SPEECH, -62);
+
+                const speech = [];
+                for (let i = 0; i < dbs.length; i++) if (dbs[i] > threshold) speech.push(i);
+
+                metrics.noise_floor_db = round(noiseDb, 1);
+                metrics.speech_frames = speech.length;
+                metrics.speech_ratio = round(speech.length / dbs.length, 3);
+                metrics.loud_ratio = round(dbs.filter(function (d) { return d > -1; }).length / dbs.length, 3);
+                if (!speech.length) return metrics;
+
+                // 목소리 크기: 같은 녹음 안의 소음 바닥 대비 값이라 기기가 달라도 비교된다
+                const speechDbs = speech.map(function (i) { return dbs[i]; }).sort(function (a, b) { return a - b; });
+                const speechMedian = quantile(speechDbs, 0.5);
+                metrics.speech_db = round(speechMedian, 1);
+                metrics.snr_db = round(speechMedian - noiseDb, 1);
+                metrics.dropout_ratio = round(speech.filter(function (i) {
+                    return dbs[i] < speechMedian - DROPOUT_DB;
+                }).length / speech.length, 3);
+
+                // 세기 흔들림(shimmer)
+                const speechLevels = speech.map(function (i) { return levels[i]; });
+                const meanLevel = speechLevels.reduce(function (a, b) { return a + b; }, 0) / speechLevels.length;
+                let ampDiff = 0;
+                let ampPairs = 0;
+                for (let k = 1; k < speech.length; k++) {
+                    if (speech[k] - speech[k - 1] !== 1) continue;
+                    ampDiff += Math.abs(levels[speech[k]] - levels[speech[k - 1]]);
+                    ampPairs++;
+                }
+                if (ampPairs >= 10 && meanLevel > 0) metrics.shimmer = round((ampDiff / ampPairs) / meanLevel, 3);
+
+                // 1.5초 이상 이어진 침묵(발화 시작~끝 사이만 센다)
+                const first = speech[0];
+                const last = speech[speech.length - 1];
+                let pauseFrames = 0;
+                let run = 0;
+                for (let i = first; i <= last; i++) {
+                    if (dbs[i] > threshold) {
+                        if (run >= PAUSE_FRAMES) pauseFrames += run;
+                        run = 0;
+                    } else {
+                        run++;
+                    }
+                }
+                if (run >= PAUSE_FRAMES) pauseFrames += run;
+                metrics.long_pause_ratio = round(pauseFrames / dbs.length, 3);
+
+                // 음높이 흔들림(jitter)과 음높이 산포
+                const voiced = speech.filter(function (i) { return pitches[i] > 0; });
+                metrics.voiced_ratio = round(voiced.length / speech.length, 3);
+                if (voiced.length > 4) {
+                    const values = voiced.map(function (i) { return pitches[i]; }).sort(function (a, b) { return a - b; });
+                    const median = quantile(values, 0.5);
+                    let diffSum = 0;
+                    let pairs = 0;
+                    for (let k = 1; k < voiced.length; k++) {
+                        if (voiced[k] - voiced[k - 1] !== 1) continue;
+                        const prev = pitches[voiced[k - 1]];
+                        const curr = pitches[voiced[k]];
+                        if (Math.max(prev, curr) / Math.min(prev, curr) > 1.8) continue;  // 옥타브 오검출 제외
+                        diffSum += Math.abs(curr - prev);
+                        pairs++;
+                    }
+                    metrics.pitch_median = round(median, 1);
+                    metrics.voiced_pairs = pairs;
+                    if (pairs >= 3 && median > 0) {
+                        metrics.jitter = round((diffSum / pairs) / median, 3);
+                        metrics.pitch_spread = round((quantile(values, 0.75) - quantile(values, 0.25)) / median, 3);
+                    }
+                }
+
+                // 발음 선명도 보조 지표
+                const hfValues = speech.map(function (i) { return highs[i]; })
+                                       .filter(function (v) { return typeof v === 'number' && isFinite(v); })
+                                       .sort(function (a, b) { return a - b; });
+                if (hfValues.length >= 10) metrics.hf_ratio = round(quantile(hfValues, 0.5), 3);
+
+                return metrics;
+            }
+
+            function describe(metrics) {
+                const parts = [];
+                if (metrics.duration) parts.push('길이 ' + Math.round(metrics.duration) + '초');
+                if (metrics.snr_db !== undefined) {
+                    parts.push('전달력 ' + (metrics.snr_db < 12 ? '약함' : (metrics.snr_db < 18 ? '보통' : '좋음')));
+                }
+                if (metrics.jitter !== undefined) {
+                    parts.push('떨림 ' + (metrics.jitter > 0.20 ? '큼' : (metrics.jitter > 0.12 ? '보통' : '안정')));
+                }
+                return parts.join(' · ');
+            }
+
+            // ===== 받아쓰기 =====
+            function startRecognition() {
+                if (!SpeechRecognition) {
+                    noteEl.textContent = '실시간 받아쓰기를 지원하지 않는 브라우저입니다. 녹음 파일을 서버에서 분석하며, Chrome·Edge에서 열면 훨씬 정확합니다.';
+                    return;
+                }
+                recognition = new SpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.onresult = function (event) {
+                    interimText = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        const piece = result[0].transcript;
+                        if (result.isFinal) {
+                            finalText += piece;
+                            if (typeof result[0].confidence === 'number' && result[0].confidence > 0) {
+                                confidenceSum += result[0].confidence;
+                                confidenceCount++;
+                            }
+                        } else {
+                            interimText += piece;
+                        }
+                    }
+                    renderTranscript();
+                };
+                recognition.onerror = function (event) {
+                    if (event.error === 'no-speech' || event.error === 'aborted') return;
+                    noteEl.textContent = '실시간 받아쓰기를 사용할 수 없어 녹음 파일만 제출됩니다. (' + event.error + ')';
+                };
+                recognition.onend = function () {
+                    if (recorder && recorder.state === 'recording') {
+                        try { recognition.start(); } catch (e) { /* 재시작 실패는 무시 */ }
+                    }
+                };
+                try {
+                    recognition.start();
+                } catch (e) {
+                    recognition = null;
+                }
+            }
+
+            function stopTracks() {
+                if (stream) {
+                    stream.getTracks().forEach(function (track) { track.stop(); });
+                    stream = null;
+                }
+            }
+
+            recordBtn.addEventListener('click', async function () {
+                try {
+                    // 자동 이득 조절을 끄면 목소리 크기를 있는 그대로 측정할 수 있다
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        audio: { autoGainControl: false, noiseSuppression: false, echoCancellation: true }
+                    });
+                } catch (e) {
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    } catch (inner) {
+                        statusEl.textContent = '마이크를 사용할 수 없습니다. 브라우저 권한 설정을 확인해 주세요.';
+                        return;
+                    }
+                }
+
+                chunks = [];
+                levels = [];
+                pitches = [];
+                highs = [];
+                confidenceSum = 0;
+                confidenceCount = 0;
+                finalText = '';
+                interimText = '';
+                metricsField.value = '';
+                audioInput.value = '';
+                previewEl.hidden = true;
+                renderTranscript();
+
+                recorder = new MediaRecorder(stream);
+                recorder.ondataavailable = function (event) {
+                    if (event.data && event.data.size > 0) chunks.push(event.data);
+                };
+                recorder.onstop = function () {
+                    const type = recorder.mimeType || 'audio/webm';
+                    const blob = new Blob(chunks, { type: type });
+                    previewEl.src = URL.createObjectURL(blob);
+                    previewEl.hidden = false;
+
+                    const measured = buildMetrics(levels.length ? (levels.length * FRAME_MS) / 1000 : seconds);
+                    metricsField.value = JSON.stringify(measured);
+
+                    const ext = type.indexOf('ogg') > -1 ? 'ogg' : (type.indexOf('mp4') > -1 ? 'm4a' : 'webm');
+                    try {
+                        const transfer = new DataTransfer();
+                        transfer.items.add(new File([blob], 'answer.' + ext, { type: type }));
+                        audioInput.files = transfer.files;
+                    } catch (e) {
+                        noteEl.textContent = '이 브라우저에서는 녹음 파일 전송이 제한되어, 받아쓰기 결과만 제출됩니다.';
+                    }
+                    submitBtn.disabled = !(transcriptField.value || audioInput.files.length);
+
+                    const summary = describe(measured);
+                    statusEl.textContent = '녹음이 끝났어요' + (summary ? ' (' + summary + ')' : '') + '. 확인 후 "녹음 답변 제출"을 눌러 주세요.';
+                };
+
+                recorder.start();
+                startRecognition();
+                startAnalysis(stream);
+
+                seconds = 0;
+                timerEl.textContent = '00:00';
+                timerId = setInterval(function () {
+                    seconds += 1;
+                    timerEl.textContent = formatTime(seconds);
+                }, 1000);
+
+                recordBtn.disabled = true;
+                recordBtn.classList.add('recording');
+                stopBtn.disabled = false;
+                resetBtn.disabled = true;
+                submitBtn.disabled = true;
+                dotEl.classList.add('on');
+                statusEl.textContent = '녹음 중입니다. 잠깐(1초) 주변 소음을 확인한 뒤 말해 주세요. 권장 길이는 40~95초, 결론 → 경험 → 결과 순서로.';
+            });
+
+            stopBtn.addEventListener('click', function () {
+                if (recorder && recorder.state !== 'inactive') recorder.stop();
+                if (recognition) {
+                    const current = recognition;
+                    recognition = null;
+                    current.onend = null;
+                    current.stop();
+                }
+                interimText = '';
+                renderTranscript();
+                stopAnalysis();
+                stopTracks();
+                clearInterval(timerId);
+                dotEl.classList.remove('on');
+                recordBtn.disabled = false;
+                recordBtn.classList.remove('recording');
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
+            });
+
+            resetBtn.addEventListener('click', function () {
+                chunks = [];
+                levels = [];
+                pitches = [];
+                highs = [];
+                confidenceSum = 0;
+                confidenceCount = 0;
+                finalText = '';
+                interimText = '';
+                metricsField.value = '';
+                audioInput.value = '';
+                previewEl.hidden = true;
+                previewEl.removeAttribute('src');
+                renderTranscript();
+                submitBtn.disabled = true;
+                resetBtn.disabled = true;
+                seconds = 0;
+                timerEl.textContent = '00:00';
+                statusEl.textContent = '녹음을 시작하면 목소리 크기·떨림·발음·답변 길이를 함께 측정합니다.';
+            });
+        })();
+        </script>
+{% endblock %}

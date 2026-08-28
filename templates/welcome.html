@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}가입 완료 | EGG{% endblock %}
+{% block chrome %}{% endblock %}
+{% block foot %}{% endblock %}
+
+{% block head %}
+<style>
+    .welcome-card {
+        text-align: center;
+        max-width: 460px;
+        animation: rise 0.45s ease both;
+    }
+
+    @keyframes rise {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    .welcome-mascot {
+        width: 150px;
+        display: block;
+        margin: -96px auto 4px;
+        animation: hatch 0.7s cubic-bezier(.2, 1.4, .4, 1) both;
+    }
+
+    @keyframes hatch {
+        from { opacity: 0; transform: translateY(18px) scale(0.86); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    .check {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--good-soft);
+        color: var(--good);
+        display: grid;
+        place-items: center;
+        font-size: 22px;
+        margin: 6px auto 14px;
+    }
+
+    .welcome-steps {
+        text-align: left;
+        background: var(--cream);
+        border-radius: var(--radius);
+        padding: 16px 18px;
+        margin: 22px 0;
+    }
+
+    .welcome-steps div {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font-size: 13px;
+        color: var(--ink-soft);
+        padding: 5px 0;
+    }
+
+    .welcome-steps b {
+        color: var(--yellow-deep);
+        font-size: 12px;
+        min-width: 46px;
+    }
+
+    .countdown {
+        font-size: 12px;
+        color: var(--ink-faint);
+        margin-top: 14px;
+    }
+
+    .countdown b {
+        color: var(--ink-soft);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+    <div class="auth-card welcome-card">
+        <img class="welcome-mascot" src="{{ url_for('static', filename='img/eggy.png') }}" alt="EGG 마스코트 애기">
+
+        <div class="check">✓</div>
+        <h2>회원가입이 완료됐어요!</h2>
+        <p class="sub" style="margin-top:8px;">
+            <b style="color:var(--ink);">{{ current_user.name }}</b>님, 반가워요.<br>
+            {% if joined == 'google' %}구글 계정으로 가입했어요.{% else %}이제 나만의 면접 연습을 시작할 수 있어요.{% endif %}
+        </p>
+
+        <div class="welcome-steps">
+            <div><b>STEP 1</b> 전공·기업·직무와 자기소개서를 담아요 (파일 업로드도 돼요)</div>
+            <div><b>STEP 2</b> 말로 또는 글로 답변하며 연습해요</div>
+            <div><b>STEP 3</b> 항목별 점수와 예상 합격 가능성을 확인해요</div>
+        </div>
+
+        <a class="btn btn-block" href="{{ url_for('profile_page') }}" id="go">
+            면접 재료 담으러 가기 &nbsp;→
+        </a>
+
+        <div class="countdown" id="countdown"><b>5초</b> 뒤 자동으로 이동합니다.</div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // 버튼을 누르지 않아도 잠시 뒤 다음 단계로 넘어간다
+    const label = document.getElementById('countdown');
+    const target = document.getElementById('go').getAttribute('href');
+    let left = 5;
+
+    const timer = setInterval(function () {
+        left -= 1;
+        if (left <= 0) {
+            clearInterval(timer);
+            window.location.href = target;
+            return;
+        }
+        label.innerHTML = '<b>' + left + '초</b> 뒤 자동으로 이동합니다.';
+    }, 1000);
+
+    // 사용자가 직접 누르면 타이머를 멈춘다
+    document.getElementById('go').addEventListener('click', function () {
+        clearInterval(timer);
+    });
+})();
+</script>
+{% endblock %}

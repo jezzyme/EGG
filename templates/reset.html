@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}비밀번호 재설정 | EGG{% endblock %}
+{% block chrome %}{% endblock %}
+{% block foot %}{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+    <div class="auth-card">
+        <img class="auth-mascot" src="{{ url_for('static', filename='img/eggy.png') }}" alt="EGG 마스코트 애기">
+
+        <div class="auth-head">
+            <a class="logo" href="{{ url_for('home') }}" style="justify-content:center; margin-bottom:14px;">
+                <span class="logo-mark">E</span> EGG
+            </a>
+            <h2>새 비밀번호 설정</h2>
+            <p class="sub">새 비밀번호를 입력하면 모든 기기에서<br>다시 로그인해야 합니다.</p>
+        </div>
+
+        {% if invalid %}
+        <div class="note note-warn"><span>⚠️</span>
+            <div>재설정 링크가 만료되었거나 이미 사용되었습니다.<br>
+            <a href="{{ url_for('forgot_page') }}" style="font-weight:700;">다시 요청하기</a></div>
+        </div>
+        {% else %}
+        {% if error %}
+        <div class="note note-warn" style="margin-bottom:16px;"><span>⚠️</span><div>{{ error }}</div></div>
+        {% endif %}
+        <form method="POST">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="password">새 비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="영문과 숫자를 포함해 8자 이상" required autofocus>
+            </div>
+            <div class="field">
+                <label for="confirm">새 비밀번호 확인</label>
+                <input type="password" id="confirm" name="confirm" placeholder="비밀번호를 한 번 더" required>
+            </div>
+            <button class="btn btn-block" type="submit">비밀번호 변경</button>
+        </form>
+        {% endif %}
+
+        <div class="auth-foot"><a href="{{ url_for('login_page') }}">로그인 화면으로</a></div>
+
+    </div>
+</div>
+{% endblock %}

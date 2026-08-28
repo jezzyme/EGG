@@ -1,188 +1,141 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EGG | 맞춤형 모의면접</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            font-family: 'Gowun Dodum', sans-serif;
-            background: radial-gradient(circle at 85% 7%, #fff1b9 0, #fff8d9 14%, transparent 33%), 
-                        linear-gradient(135deg, #fbfaf5 0%, #f6f6ed 52%, #edf4e6 100%);
-            color: #202a25;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1050px;
-            margin: 0 auto;
-            padding: 30px 6vw 55px;
-        }
-        
-        .eg-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 42px;
-        }
-        
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            font-family: 'Jua', sans-serif;
-            font-size: 24px;
-        }
-        
-        .egg-mark {
-            width: 22px;
-            height: 29px;
-            display: inline-block;
-            border-radius: 53% 47% 50% 50% / 45% 43% 57% 55%;
-            background: #f7c63e;
-            position: relative;
-        }
-        
-        .egg-mark:after {
-            content: '';
-            position: absolute;
-            width: 7px;
-            height: 8px;
-            top: 4px;
-            left: 6px;
-            border-radius: 50%;
-            background: #fff2bb;
-        }
-        
-        .motto {
-            background: #e7eddf;
-            color: #6a756a;
-            border-radius: 22px;
-            padding: 9px 16px;
-            font-size: 12px;
-        }
-        
-        .hero-title {
-            font-family: 'Jua', sans-serif;
-            font-size: clamp(38px, 5vw, 65px);
-            line-height: 1.12;
-            margin: 0 0 18px;
-        }
-        
-        .hero-title span {
-            color: #df941d;
-        }
-        
-        .lead {
-            font-size: 16px;
-            line-height: 1.8;
-            color: #667169;
-            max-width: 445px;
-        }
-        
-        .step-row {
-            display: flex;
-            gap: 10px;
-            margin: 27px 0 0;
-            flex-wrap: wrap;
-        }
-        
-        .step {
-            background: #fff;
-            border-radius: 12px;
-            padding: 12px 15px;
-            font-size: 13px;
-            box-shadow: 0 4px 16px #75807713;
-        }
-        
-        .step strong {
-            color: #d98f13;
-            margin-left: 8px;
-        }
-        
-        button {
-            border-radius: 11px;
-            border: 0;
-            background: #263c31;
-            color: white;
-            min-height: 44px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 10px 20px;
-            font-family: 'Gowun Dodum', sans-serif;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        button:hover {
-            background: #d98f13;
-        }
-        
-        .footer-note {
-            color: #8a9289;
-            font-size: 11px;
-            margin-top: 55px;
-        }
-        
-        h1, h2, h3 {
-            font-family: 'Jua', sans-serif;
-            color: #202a25;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="eg-header">
-            <div class="brand">
-                <div class="egg-mark"></div> 
-                EGG 
-                <div style="font-family: Gowun Dodum; font-size:11px; color:#778078; line-height:1.1;">
-                    Interview<br>Lab
-                </div>
-            </div>
-            <div class="motto">나의 가능성을 한 단계 더 익히는 시간</div>
+{% extends "base.html" %}
+{% set active = 'home' %}
+{% block title %}EGG | 맞춤형 모의면접{% endblock %}
+
+{% block body %}
+<div class="wrap">
+    <section class="hero">
+        <div class="hero-copy">
+            <span class="chip-label">✨ 오늘의 면접 준비</span>
+            <h1>
+                합격할 준비,
+                <span class="accent">차근차근 부화 중!</span>
+            </h1>
+            <p>
+                내 스펙과 자기소개서를 바탕으로<br>
+                진짜 나올 법한 질문부터 연습해요.
+            </p>
+            {% if current_user %}
+            <a class="btn" href="{{ url_for('profile_page') }}">맞춤 면접 시작하기 &nbsp;→</a>
+            {% else %}
+            <a class="btn" href="{{ url_for('signup_page') }}">무료로 시작하기 &nbsp;→</a>
+            {% endif %}
         </div>
-        
-        <div style="display: flex; gap: 40px; align-items: center;">
-            <div style="flex: 1;">
-                <div style="color:#d58b16; font-weight:700; font-size:14px; margin-bottom:10px;">AI 맞춤형 모의면접 앱</div>
-                <div class="hero-title">
-                    합격의 감각을<br>
-                    <span>차근차근 익히는</span><br>
-                    면접 연습
-                </div>
-                <div class="lead">
-                    나의 스펙과 자기소개서를 바탕으로 질문을 만들고,<br>
-                    답변의 밀도와 방향을 분석해 다음 연습을 제안해요.
-                </div>
-                <div class="step-row">
-                    <div class="step">정보를 담고 <strong>→</strong></div>
-                    <div class="step">답변을 익히고 <strong>→</strong></div>
-                    <div class="step">합격에 가까워져요</div>
-                </div>
-                <a href="{{ url_for('profile_page') }}" style="text-decoration: none;">
-                    <button>내 면접 재료 담으러 가기  →</button>
-                </a>
+
+        <div class="hero-mascot">
+            <div class="bubble">
+                오늘도 한 단계<br><b>성장해볼까요?</b>
             </div>
-            
-            <div style="flex: 1; text-align: center;">
-                <div style="font-size: 12px; color: #8a9289;">
-                    실제 배포 시 스크린샷이 표시됩니다
-                </div>
-            </div>
+            <img src="{{ url_for('static', filename='img/eggy.png') }}" alt="EGG 마스코트 애기">
         </div>
-        
-        <div class="footer-note">
-            <b>EGG</b>는 정보를 수집하는 것에서 끝나지 않고, <b>답변 → 피드백 → 재연습</b>의 루틴을 만듭니다.
+    </section>
+
+    {% if current_user %}
+    <div class="grid-3" style="margin-top: 16px;">
+        <div class="tile">
+            <div class="tile-icon">🔥</div>
+            <div class="tile-body">
+                <span>완료한 면접</span>
+                <b>{{ stats.finished }}회</b>
+            </div>
+            {% if stats.this_week %}<div class="tile-flag">이번 주 {{ stats.this_week }}회</div>{% endif %}
+        </div>
+        <div class="tile">
+            <div class="tile-icon">🎯</div>
+            <div class="tile-body">
+                <span>평균 점수</span>
+                <b>{{ stats.average if stats.average is not none else '–' }}{% if stats.average is not none %}점{% endif %}</b>
+            </div>
+            {% if stats.delta %}<div class="tile-flag">{{ '+' if stats.delta > 0 }}{{ stats.delta }}</div>{% endif %}
+        </div>
+        <div class="tile">
+            <div class="tile-icon">🏆</div>
+            <div class="tile-body">
+                <span>최근 예상 합격 가능성</span>
+                <b>{{ stats.pass_rate if stats.pass_rate is not none else '–' }}{% if stats.pass_rate is not none %}%{% endif %}</b>
+            </div>
         </div>
     </div>
-</body>
-</html>
+
+    <div class="grid-2" style="margin-top: 14px;">
+        <div class="card">
+            <div class="eyebrow">Next Interview</div>
+            <h3 style="margin-bottom: 16px;">다음 추천 모의면접</h3>
+
+            {% if stats.pending %}
+            <div class="row-item">
+                <div class="row-icon">▶</div>
+                <div class="row-main">
+                    <span class="badge">이어서 연습</span>
+                    <b style="display:block; margin-top:6px;">{{ stats.pending.company }} · {{ stats.pending.role }}</b>
+                    <span>{{ stats.pending.answer_count }}/{{ stats.pending.question_count }}문항 답변함</span>
+                </div>
+                <a class="btn btn-outline btn-sm" href="{{ url_for('interview_page') }}">이어하기</a>
+            </div>
+            {% else %}
+            <div class="row-item">
+                <div class="row-icon">＋</div>
+                <div class="row-main">
+                    <span class="badge">맞춤 추천</span>
+                    <b style="display:block; margin-top:6px;">
+                        {% if stats.last %}{{ stats.last.company }} · {{ stats.last.role }}{% else %}관심 기업 · 관심 직무{% endif %}
+                    </b>
+                    <span>프로필 기반 질문 3개 · 약 5분</span>
+                </div>
+                <a class="btn btn-outline btn-sm" href="{{ url_for('profile_page') }}">연습 시작</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="eyebrow">My Growth</div>
+            <h3 style="margin-bottom: 16px;">나의 성장 기록</h3>
+
+            <div style="display:flex; align-items:center; gap:14px;">
+                <img src="{{ url_for('static', filename='img/eggy-sm.png') }}" alt="" style="width:52px;">
+                <div style="flex:1;">
+                    <div class="bar-track" style="height:8px;">
+                        <div class="bar-fill" style="width: {{ level.ratio }}%"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px;">
+                        <span style="color:var(--ink-soft);">{{ level.hint }}</span>
+                        <span style="color:var(--yellow-deep); font-weight:700;">LEVEL {{ level.level }} · {{ level.name }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:16px; text-align:right;">
+                <a class="ghost-link" href="{{ url_for('mypage') }}">성장 기록 전체 보기 →</a>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="grid-3" style="margin-top: 16px;">
+        <div class="card">
+            <div class="eyebrow">Step 1</div>
+            <h3>정보를 담고</h3>
+            <p class="sub" style="margin-top:6px;">전공·기업·직무와 자기소개서를 넣으면 나에게 맞는 질문이 만들어져요.</p>
+        </div>
+        <div class="card">
+            <div class="eyebrow">Step 2</div>
+            <h3>답변을 익히고</h3>
+            <p class="sub" style="margin-top:6px;">말로 답하면 목소리 크기·떨림·발음까지, 글로 답하면 문장과 구성을 평가해요.</p>
+        </div>
+        <div class="card">
+            <div class="eyebrow">Step 3</div>
+            <h3>합격에 가까워져요</h3>
+            <p class="sub" style="margin-top:6px;">항목별 점수와 예상 합격 가능성으로 다음에 무엇을 고칠지 알려드려요.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="note note-info" style="margin-top: 24px;">
+        <span>🌐</span>
+        <div>
+            <b class="t">Chrome 또는 Edge에서 이용해 주세요.</b>
+            녹음 답변을 실시간으로 글로 옮기는 음성 인식 기능이 두 브라우저에서 가장 정확하게 동작합니다.
+        </div>
+    </div>
+</div>
+{% endblock %}

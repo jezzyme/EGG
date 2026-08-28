@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}회원가입 | EGG{% endblock %}
+{% block chrome %}{% endblock %}
+{% block foot %}{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+    <div class="auth-card">
+        <img class="auth-mascot" src="{{ url_for('static', filename='img/eggy.png') }}" alt="EGG 마스코트 애기">
+
+        <div class="auth-head">
+            <a class="logo" href="{{ url_for('home') }}" style="justify-content:center; margin-bottom:14px;">
+                <span class="logo-mark">E</span> EGG
+            </a>
+            <h2>면접 연습을 시작해요</h2>
+            <p class="sub">계정을 만들면 답변 기록과 평가 리포트가<br>다음 연습까지 이어집니다.</p>
+        </div>
+
+        {% if google_enabled %}
+        <a class="btn btn-google btn-block" href="{{ url_for('google_start') }}">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.7 30.1 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.2-.4-4.6H24v9.1h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.2 5.6c4.2-3.9 6.6-9.7 6.6-16.6z"/>
+                <path fill="#FBBC05" d="M10.4 28.7c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C1 16.3 0 20 0 24s1 7.7 2.6 10.8l7.8-6.1z"/>
+                <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.2-5.6c-2 1.4-4.6 2.2-8.7 2.2-6.3 0-11.7-3.7-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/>
+            </svg>
+            구글로 계속하기
+        </a>
+        <div class="or-divider">또는 이메일로</div>
+        {% endif %}
+        {% if error %}
+        <div class="note note-warn" style="margin-bottom:16px;"><span>⚠️</span><div>{{ error }}</div></div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="name">이름</label>
+                <input type="text" id="name" name="name" value="{{ form.name or '' }}" placeholder="홍길동" required autofocus>
+            </div>
+            <div class="field">
+                <label for="email">이메일</label>
+                <input type="email" id="email" name="email" value="{{ form.email or '' }}" placeholder="egg@example.com" required>
+            </div>
+            <div class="field">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="영문과 숫자를 포함해 8자 이상" required>
+            </div>
+            <div class="field">
+                <label for="confirm">비밀번호 확인</label>
+                <input type="password" id="confirm" name="confirm" placeholder="비밀번호를 한 번 더" required>
+            </div>
+            <button class="btn btn-block" type="submit">회원가입</button>
+        </form>
+
+        <div class="note note-plain" style="margin-top:18px; font-size:11.5px;">
+            <span>🔒</span>
+            <div>
+                <b class="t">개인정보 안내</b>
+                이름·이메일·비밀번호와 연습 기록(프로필, 답변, 평가 결과)을 저장합니다.
+                비밀번호는 해시로 변환해 저장하므로 원문은 남지 않고, 답변과 자기소개서는
+                브라우저 쿠키가 아닌 서버에만 보관합니다. 녹음 파일은 분석 후 즉시 삭제하며,
+                기록과 계정은 성장 기록 화면에서 언제든 삭제할 수 있습니다.
+            </div>
+        </div>
+
+        <div class="auth-foot">이미 계정이 있나요? <a href="{{ url_for('login_page') }}">로그인</a></div>
+
+    </div>
+</div>
+{% endblock %}
