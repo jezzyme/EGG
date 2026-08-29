@@ -146,7 +146,16 @@ def _get_pool():
     try:
         from psycopg.rows import dict_row
         from psycopg_pool import ConnectionPool
-        _pool = ConnectionPool(DATABASE_URL, min_size=1, max_size=5, timeout=CONNECT_TIMEOUT,
+        # 외부 데이터베이스는 놀고 있는 연결을 스스로 끊는다(Neon 등).
+        # 끊긴 연결을 그대로 건네면 "SSL error: bad record mac" 같은 오류가 나므로,
+        # 건네주기 전에 확인하고 오래된 연결은 스스로 정리하게 한다.
+        _pool = ConnectionPool(DATABASE_URL,
+                               min_size=0,              # 안 쓸 때는 연결을 남겨 두지 않는다
+                               max_size=5,
+                               timeout=CONNECT_TIMEOUT,
+                               max_idle=60,             # 60초 놀면 닫는다
+                               max_lifetime=600,        # 10분마다 새로 만든다
+                               check=ConnectionPool.check_connection,   # 건네기 전 확인
                                kwargs={"row_factory": dict_row}, open=True)
     except Exception:
         _pool = None                            # 풀을 쓸 수 없으면 매번 새로 연결한다
@@ -271,20 +280,59 @@ def _columns(connection, table):
 
 
 # ========== 읽기·쓰기 ==========
+def _is_connection_error(error):
+    """연결이 끊겨서 난 오류인지(다시 시도해 볼 만한지) 판단한다."""
+    name = type(error).__name__
+    if name in ("OperationalError", "InterfaceError", "PoolTimeout", "AdminShutdown"):
+        return True
+    text = str(error).lower()
+    return any(word in text for word in ("ssl", "closed", "terminat", "broken", "reset"))
+
+
+def _run(action, retries=1):
+    """연결이 끊겼으면 한 번 더 시도한다.
+
+    실패는 문장을 보내기 전이나 보내는 중에 일어나므로 저장이 두 번 되지는 않는다.
+    """
+    for attempt in range(retries + 1):
+        try:
+            with connect() as connection:
+                return action(connection)
+        except Exception as error:
+            if attempt >= retries or not _is_connection_error(error):
+                raise
+            _drop_pool()                        # 망가진 연결 묶음을 버리고 새로 만든다
+
+
+def _drop_pool():
+    global _pool, _pool_tried
+    if _pool is not None:
+        try:
+            _pool.close()
+        except Exception:
+            pass
+    _pool = None
+    _pool_tried = False
+
+
 def query(sql, params=(), one=False):
-    with connect() as connection:
+    def action(connection):
         cursor = connection.cursor()
         cursor.execute(translate(sql), params)
-        rows = cursor.fetchall()
+        return cursor.fetchall()
+
+    rows = _run(action)
     return (rows[0] if rows else None) if one else rows
 
 
 def execute(sql, params=()):
-    with connect() as connection:
+    def action(connection):
         cursor = connection.cursor()
         cursor.execute(translate(sql), params)
         connection.commit()
         return cursor.rowcount
+
+    return _run(action)
 
 
 # ========== 파일 권한(SQLite 전용) ==========
