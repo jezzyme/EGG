@@ -489,6 +489,7 @@
             const PAUSE_FRAMES = 30;     // 1.5초 이상 이어진 침묵
             const CALIB_FRAMES = 14;     // 녹음 시작 직후 0.7초는 주변 소음 측정에 쓴다
             const WINDOW_FRAMES = 20;    // 1초 창마다 최솟값을 모아 소음 바닥을 추정한다
+            const FLOOR_WINDOW = 60;     // 실시간 미터는 최근 3초를 기준으로 삼는다
 
             let recognition = null;
             let recorder = null;
@@ -509,6 +510,7 @@
             let pitches = [];            // 프레임별 기본주파수(무성음은 0)
             let highs = [];              // 프레임별 2kHz 이상 에너지 비율
             let liveFloor = null;        // 실시간 미터용 소음 바닥 추정치
+            let recentLevels = [];       // 최근 프레임들(미터 기준을 잡는 데 쓴다)
             let confidenceSum = 0;
             let confidenceCount = 0;
 
@@ -595,9 +597,19 @@
             }
 
             function updateMeter(rms) {
-                // 절대 음량 대신 '소음 대비 얼마나 큰지'를 보여 준다(기기 차이를 줄임)
-                if (liveFloor === null) liveFloor = rms;
-                liveFloor = rms < liveFloor ? (liveFloor * 0.8 + rms * 0.2) : (liveFloor * 0.995 + rms * 0.005);
+                // 절대 음량 대신 '소음 대비 얼마나 큰지'를 보여 준다(기기 차이를 줄임).
+                // 기준(소음 바닥)은 최근 3초 중 가장 조용했던 순간으로 잡는다.
+                // 첫 소리를 기준으로 삼으면, 시작하자마자 말을 할 때 기준이 목소리가 되어
+                // 미터가 계속 0에 머문다(다시 녹음할 때 흔히 생기던 문제).
+                recentLevels.push(rms);
+                if (recentLevels.length > FLOOR_WINDOW) recentLevels.shift();
+
+                let floor = recentLevels[0];
+                for (let i = 1; i < recentLevels.length; i++) {
+                    if (recentLevels[i] < floor) floor = recentLevels[i];
+                }
+                liveFloor = Math.max(floor, 1e-6);
+
                 const snr = toDb(rms) - toDb(liveFloor);
                 const percent = Math.max(0, Math.min(100, (snr / 40) * 100));
                 meterFill.style.width = percent + '%';
@@ -606,10 +618,28 @@
                 else meterHint.textContent = '좋은 음량';
             }
 
+            // 소리 분석기는 '사용자가 버튼을 누른 그 순간'에 준비해야 한다.
+            // 모바일 브라우저는 클릭과 떨어져 만들어진 분석기를 멈춘 상태로 두기 때문에,
+            // 그대로 두면 두 번째 녹음부터 소리 데이터가 들어오지 않는다.
+            function ensureAudioContext() {
+                if (!AudioContextClass) return null;
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new AudioContextClass();
+                    } catch (e) {
+                        return null;
+                    }
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume().catch(function () { /* 깨우지 못해도 녹음은 계속된다 */ });
+                }
+                return audioCtx;
+            }
+
             function startAnalysis(mediaStream) {
-                if (!AudioContextClass) return;
+                if (!ensureAudioContext()) return;
+                recentLevels = [];                  // 새 녹음마다 기준을 새로 잡는다
                 try {
-                    audioCtx = new AudioContextClass();
                     sourceNode = audioCtx.createMediaStreamSource(mediaStream);
                     analyser = audioCtx.createAnalyser();
                     analyser.fftSize = 2048;
@@ -618,10 +648,12 @@
                     frameBuffer = new Float32Array(analyser.fftSize);
                     freqBuffer = new Float32Array(analyser.frequencyBinCount);
                 } catch (e) {
-                    audioCtx = null;
                     return;
                 }
                 sampleTimer = setInterval(function () {
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume().catch(function () {});   // 중간에 멈추면 다시 깨운다
+                    }
                     analyser.getFloatTimeDomainData(frameBuffer);
                     let power = 0;
                     for (let i = 0; i < frameBuffer.length; i++) power += frameBuffer[i] * frameBuffer[i];
@@ -636,8 +668,9 @@
             function stopAnalysis() {
                 clearInterval(sampleTimer);
                 sampleTimer = null;
+                recentLevels = [];
                 if (sourceNode) { try { sourceNode.disconnect(); } catch (e) {} sourceNode = null; }
-                if (audioCtx) { try { audioCtx.close(); } catch (e) {} audioCtx = null; }
+                // 분석기는 닫지 않고 그대로 둔다. 다시 만들면 모바일에서 멈춘 상태로 시작한다.
                 analyser = null;
                 liveFloor = null;
                 meterFill.style.width = '0%';
@@ -821,6 +854,7 @@
             }
 
             recordBtn.addEventListener('click', async function () {
+                ensureAudioContext();               // 클릭한 이 순간에 준비해야 모바일에서 동작한다
                 try {
                     // 자동 이득 조절을 끄면 목소리 크기를 있는 그대로 측정할 수 있다
                     stream = await navigator.mediaDevices.getUserMedia({
