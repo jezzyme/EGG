@@ -18,6 +18,7 @@ import sqlite3
 import stat
 import subprocess
 import tempfile
+import threading
 import time
 from datetime import datetime
 
@@ -71,8 +72,13 @@ EXTRA_COLUMNS = [
     ("users", "google_sub", "TEXT"),
 ]
 
+# 표를 만들 때 쓰는 잠금(같은 프로세스 안 / 데이터베이스 전체)
+_schema_lock = threading.Lock()
+SCHEMA_LOCK_ID = 8175243                        # 이 앱만 쓰는 임의의 번호
+
 _path = None
 _schema_ready = False
+_wal_ready = False
 _pool = None
 _pool_tried = False
 
@@ -166,41 +172,91 @@ def connect():
                 yield connection
         return
 
-    connection = sqlite3.connect(db_path(), timeout=10.0)
+    connection = sqlite3.connect(db_path(), timeout=15.0)
     connection.row_factory = sqlite3.Row
     try:
-        connection.execute("PRAGMA journal_mode=WAL")      # 읽기와 쓰기가 서로를 막지 않게 한다
-        connection.execute("PRAGMA busy_timeout=8000")     # 다른 프로세스가 쓰는 중이면 기다린다
+        connection.execute("PRAGMA busy_timeout=15000")    # 다른 쪽이 쓰는 중이면 기다린다
         connection.execute("PRAGMA foreign_keys=ON")
+        _enable_wal(connection)
         _ensure_schema(connection)
         yield connection
     finally:
         connection.close()
 
 
+def _enable_wal(connection):
+    """읽기와 쓰기가 서로를 막지 않도록 WAL 모드로 바꾼다.
+
+    이 설정은 데이터베이스 파일에 저장되므로 한 번만 하면 된다.
+    연결마다 실행하면 다른 연결이 열려 있을 때 잠금 오류가 난다.
+    """
+    global _wal_ready
+    if _wal_ready:
+        return
+    try:
+        connection.execute("PRAGMA journal_mode=WAL")
+    except sqlite3.OperationalError:
+        pass                                    # 이미 켜져 있거나 다른 연결이 쓰는 중이면 넘어간다
+    _wal_ready = True
+
+
+def _run_ddl(connection, statement):
+    """표 만들기 같은 문장을 하나씩, 각각 따로 처리한다.
+
+    PostgreSQL 은 트랜잭션 안에서 오류가 한 번 나면 그 연결로 더는 아무것도 못 한다.
+    그래서 실패하면 곧바로 되돌려(rollback) 연결을 계속 쓸 수 있게 한다.
+    """
+    try:
+        connection.cursor().execute(statement)
+        connection.commit()
+        return True
+    except Exception:
+        try:
+            connection.rollback()
+        except Exception:
+            pass
+        return False                            # 이미 있거나 다른 워커가 먼저 만든 경우
+
+
 def _ensure_schema(connection):
-    """표를 만들고 빠진 컬럼을 채운다(최초 한 번)."""
+    """표를 만들고 빠진 컬럼을 채운다(최초 한 번).
+
+    배포 직후에는 여러 워커가 동시에 시작하므로, 같은 표를 동시에 만들려다 충돌할 수 있다.
+    프로세스 안에서는 잠금으로, 프로세스 사이에서는 데이터베이스 잠금으로 한 번에 하나만 하게 한다.
+    """
     global _schema_ready
     if _schema_ready:
         return
 
-    types = TYPES[backend()]
-    cursor = connection.cursor()
-    for statement in TABLES:
-        cursor.execute(statement.format(**types))
+    with _schema_lock:
+        if _schema_ready:
+            return
 
-    for table, column, definition in EXTRA_COLUMNS:
-        if column in _columns(connection, table):
-            continue
+        locked = False
+        if USE_POSTGRES:                        # 다른 워커가 끝낼 때까지 기다린다
+            locked = _run_ddl(connection, "SELECT pg_advisory_lock(%d)" % SCHEMA_LOCK_ID)
+
         try:
-            cursor.execute("ALTER TABLE %s ADD COLUMN %s %s" % (table, column, definition))
-        except Exception:
-            pass                                # 이미 있으면 넘어간다
+            types = TYPES[backend()]
+            for statement in TABLES:
+                _run_ddl(connection, statement.format(**types))
 
-    connection.commit()
-    if not USE_POSTGRES:
-        _restrict_permissions(db_path())
-    _schema_ready = True
+            for table, column, definition in EXTRA_COLUMNS:
+                try:
+                    existing = _columns(connection, table)
+                except Exception:
+                    connection.rollback()
+                    continue
+                if column not in existing:
+                    _run_ddl(connection, "ALTER TABLE %s ADD COLUMN %s %s"
+                             % (table, column, definition))
+        finally:
+            if locked:
+                _run_ddl(connection, "SELECT pg_advisory_unlock(%d)" % SCHEMA_LOCK_ID)
+
+        if not USE_POSTGRES:
+            _restrict_permissions(db_path())
+        _schema_ready = True
 
 
 def _columns(connection, table):

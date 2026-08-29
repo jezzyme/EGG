@@ -42,10 +42,25 @@ postgresql://사용자:비밀번호@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?
 
 빌드·실행 명령은 `render.yaml`에 들어 있습니다.
 
+**Build Command**
+
 ```
-빌드:  pip install -r requirements.txt
-실행:  gunicorn app_flask:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+pip install -r requirements.txt
 ```
+
+**Start Command**
+
+```
+gunicorn app_flask:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --max-requests 500 --max-requests-jitter 50
+```
+
+| 옵션 | 뜻 |
+|---|---|
+| `app_flask:app` | `app_flask.py` 안의 `app` 객체를 실행 |
+| `--bind 0.0.0.0:$PORT` | Render가 정해 주는 포트에 연결 (**반드시 필요**) |
+| `--workers 2 --threads 4` | 동시에 8개 요청 처리. 메모리 부족 로그가 보이면 `--workers 1` 로 |
+| `--timeout 120` | 자기소개서 파일 분석에 시간이 걸릴 수 있어 넉넉히 |
+| `--max-requests 500` | 워커를 주기적으로 새로 띄워 메모리가 쌓이는 것을 방지 |
 
 ## 3단계 · 배포 확인
 

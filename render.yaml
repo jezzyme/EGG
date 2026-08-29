@@ -7,7 +7,8 @@ services:
     plan: free
     region: singapore
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app_flask:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    # 무료 플랜(512MB)에 맞춘 설정. 메모리 부족 로그가 보이면 --workers 1 로 줄인다.
+    startCommand: gunicorn app_flask:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --max-requests 500 --max-requests-jitter 50
     healthCheckPath: /
     envVars:
       - key: PYTHON_VERSION
