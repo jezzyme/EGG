@@ -928,7 +928,7 @@ def interview_page():
 
             # 받아쓰기를 지원하지 않는 브라우저(아이폰 사파리·인앱 브라우저 등)에서도
             # 녹음만 되었다면 답변으로 받는다. 내용 평가는 건너뛰고 전달력만 채점한다.
-            recorded = bool(metrics) and float(metrics.get("duration") or 0) >= 5
+            recorded = bool(metrics) and float(metrics.get("duration") or 0) >= 2
             if not answer_text and not recorded:
                 return again("녹음이 확인되지 않았습니다. 다시 녹음하거나 텍스트로 답변해 주세요.")
 

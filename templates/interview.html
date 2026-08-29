@@ -353,6 +353,7 @@
 
     <form class="answer-card" method="POST" enctype="multipart/form-data" id="answer-form">
         <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="input_mode" id="input-mode" value="">
 
         <div class="mode-tabs">
             <button type="button" class="mode-tab on" data-pane="pane-text">
@@ -371,7 +372,7 @@
             <div class="pane on" id="pane-text">
                 <textarea name="answer" placeholder="결론부터 말하고, 상황 → 내가 한 행동 → 결과 순서로 설명해 보세요."></textarea>
                 <div class="voice-note">텍스트 답변은 질문 적합도·내용 구체성·문장 가독성·분량으로 평가돼요.</div>
-                <button class="btn btn-block" type="submit" style="margin-top: 18px;">답변 제출 &nbsp;→</button>
+                <button class="btn btn-block" type="submit" id="btn-text-submit" style="margin-top: 18px;">답변 제출 &nbsp;→</button>
             </div>
 
             <div class="pane" id="pane-voice">
@@ -409,7 +410,7 @@
                 <input type="hidden" name="voice_metrics" id="voice-metrics">
                 <input type="file" name="audio" id="audio-input" accept="audio/*" hidden>
 
-                <button class="btn btn-block" type="submit" name="input_mode" value="voice"
+                <button class="btn btn-block" type="submit"
                         id="btn-voice-submit" style="margin-top: 18px;" disabled>녹음 답변 제출 &nbsp;→</button>
                 <div class="voice-note" id="voice-note">마이크 사용 권한을 허용해 주세요. 녹음과 측정값은 답변 평가에만 사용됩니다.</div>
             </div>
@@ -423,14 +424,36 @@
 
 <script>
 (function () {
-    // 같은 답변이 두 번 저장되지 않도록 제출 버튼을 한 번만 누르게 한다
     const form = document.getElementById('answer-form');
+    const modeField = document.getElementById('input-mode');
+    const textSubmit = document.getElementById('btn-text-submit');
+    const voiceSubmit = document.getElementById('btn-voice-submit');
+
+    // 어떤 버튼으로 제출했는지 숨은 값에 적어 둔다.
+    // 버튼 자체에 값을 담으면, 제출 직후 버튼을 잠글 때 그 값이 함께 사라진다.
+    if (textSubmit) {
+        textSubmit.addEventListener('click', function () { modeField.value = 'text'; });
+    }
+    if (voiceSubmit) {
+        voiceSubmit.addEventListener('click', function () { modeField.value = 'voice'; });
+    }
+
+    // 같은 답변이 두 번 저장되지 않도록 한 번만 보낸다
+    let submitting = false;
     if (form) {
-        form.addEventListener('submit', function () {
-            form.querySelectorAll('button[type=submit]').forEach(function (button) {
-                button.disabled = true;
-                button.textContent = '제출 중…';
-            });
+        form.addEventListener('submit', function (event) {
+            if (submitting) {
+                event.preventDefault();
+                return;
+            }
+            submitting = true;
+            // 폼 내용이 다 담긴 뒤에 버튼을 잠근다(바로 잠그면 전송 값이 빠진다)
+            setTimeout(function () {
+                form.querySelectorAll('button[type=submit]').forEach(function (button) {
+                    button.disabled = true;
+                    button.textContent = '제출 중…';
+                });
+            }, 0);
         });
     }
 
@@ -499,6 +522,7 @@
             let interimText = '';
             let timerId = null;
             let seconds = 0;
+            let startedAt = 0;           // 녹음을 시작한 실제 시각
 
             let audioCtx = null;
             let analyser = null;
@@ -742,20 +766,23 @@
                 }
                 if (ampPairs >= 10 && meanLevel > 0) metrics.shimmer = round((ampDiff / ampPairs) / meanLevel, 3);
 
-                // 1.5초 이상 이어진 침묵(발화 시작~끝 사이만 센다)
+                // 1.5초 이상 이어진 침묵(발화 시작~끝 사이만 센다).
+                // 프레임 간격은 기기 성능에 따라 달라지므로 실제 값으로 환산한다.
+                const frameMs = dbs.length ? (duration * 1000) / dbs.length : FRAME_MS;
+                const pauseLimit = Math.max(8, Math.round(1500 / frameMs));
                 const first = speech[0];
                 const last = speech[speech.length - 1];
                 let pauseFrames = 0;
                 let run = 0;
                 for (let i = first; i <= last; i++) {
                     if (dbs[i] > threshold) {
-                        if (run >= PAUSE_FRAMES) pauseFrames += run;
+                        if (run >= pauseLimit) pauseFrames += run;
                         run = 0;
                     } else {
                         run++;
                     }
                 }
-                if (run >= PAUSE_FRAMES) pauseFrames += run;
+                if (run >= pauseLimit) pauseFrames += run;
                 metrics.long_pause_ratio = round(pauseFrames / dbs.length, 3);
 
                 // 음높이 흔들림(jitter)과 음높이 산포
@@ -895,7 +922,10 @@
                     previewEl.src = URL.createObjectURL(blob);
                     previewEl.hidden = false;
 
-                    const measured = buildMetrics(levels.length ? (levels.length * FRAME_MS) / 1000 : seconds);
+                    // 길이는 분석 프레임 수가 아니라 실제 시계로 잰다.
+                    // 느린 기기에서는 분석이 밀려 프레임이 적게 쌓이므로 길이가 짧게 나온다.
+                    const elapsed = startedAt ? (Date.now() - startedAt) / 1000 : seconds;
+                    const measured = buildMetrics(elapsed);
                     metricsField.value = JSON.stringify(measured);
 
                     const ext = type.indexOf('ogg') > -1 ? 'ogg' : (type.indexOf('mp4') > -1 ? 'm4a' : 'webm');
@@ -925,6 +955,7 @@
                 startRecognition();
                 startAnalysis(stream);
 
+                startedAt = Date.now();
                 seconds = 0;
                 timerEl.textContent = '00:00';
                 timerId = setInterval(function () {
