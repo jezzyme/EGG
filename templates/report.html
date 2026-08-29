@@ -230,7 +230,8 @@
             <div>
                 <b class="t">다음 보완 과제</b>
                 {% if summary.worst %}<b>{{ summary.worst.label }} {{ summary.worst.score }}점</b> — 다음 연습에서 이 항목 하나만 집중해 보세요.{% endif %}
-                {% if summary.off_topic_count %}<br>질문과 어긋난 답변이 {{ summary.off_topic_count }}개 있었어요. 질문의 핵심 단어를 그대로 받아 결론부터 말해 보세요.{% endif %}
+                {% if summary.partial_count %}<br>답변 {{ summary.partial_count }}개는 말한 내용이 글로 남지 않아 <b>목소리 전달력만</b> 평가했어요. 녹음 뒤 내용을 적으면 질문 적합도와 구체성까지 채점됩니다.{% endif %}
+            {% if summary.off_topic_count %}<br>질문과 어긋난 답변이 {{ summary.off_topic_count }}개 있었어요. 질문의 핵심 단어를 그대로 받아 결론부터 말해 보세요.{% endif %}
             </div>
         </div>
     </div>
@@ -254,6 +255,9 @@
                 </div>
                 {% if answer.evaluation and answer.evaluation.off_topic %}
                 <span class="badge badge-bad">동문서답 주의</span>
+                {% endif %}
+                {% if answer.evaluation and answer.evaluation.partial %}
+                <span class="badge badge-warn">전달력만 평가</span>
                 {% endif %}
                 {% if answer.evaluation %}
                 <div class="row-score">{{ answer.evaluation.total }}<span class="sub" style="font-weight:400;">점</span></div>

@@ -441,11 +441,23 @@ def evaluate_answer(question, answer, metrics=None, profile=None, tag=None):
     is_voice = bool(metrics)
     rubric = VOICE_RUBRIC if is_voice else TEXT_RUBRIC
 
-    relevance, off_topic = score_relevance(question, answer, profile, tag)
-    computed = {
-        "relevance": relevance,
-        "substance": score_substance(answer, strict=not is_voice),
-    }
+    # 받아쓰기가 되지 않는 브라우저(아이폰 사파리·인앱 브라우저 등)에서는 글이 없을 수 있다.
+    # 이때는 내용 평가를 억지로 하지 않고 목소리 전달력만 본다.
+    has_text = _hangul_count(answer) >= 10
+
+    if is_voice and not has_text:
+        no_text = "말한 내용을 글로 옮기지 못해 내용 평가는 건너뛰었어요. 다음에는 답변을 함께 적어 주세요."
+        computed = {
+            "relevance": _item(None, no_text, False, "받아쓰기 없음"),
+            "substance": _item(None, no_text, False, "받아쓰기 없음"),
+        }
+        off_topic = False
+    else:
+        relevance, off_topic = score_relevance(question, answer, profile, tag)
+        computed = {
+            "relevance": relevance,
+            "substance": score_substance(answer, strict=not is_voice),
+        }
     if is_voice:
         computed["delivery"] = score_delivery(metrics, answer)
         computed["steadiness"] = score_steadiness(metrics)
@@ -463,13 +475,25 @@ def evaluate_answer(question, answer, metrics=None, profile=None, tag=None):
 
     measured = [item for item in items if item["measured"]]
     measured_weight = sum(item["weight"] for item in measured)
+    if not measured_weight:                     # 아무것도 측정하지 못한 경우
+        return {
+            "mode": "음성" if is_voice else "텍스트",
+            "rubric": "음성 채점표" if is_voice else "텍스트 채점표",
+            "total": None, "grade": "-", "pass_rate": None, "items": items,
+            "off_topic": False, "reliability": 0.0,
+            "headline": "이번 답변은 평가할 수 있는 정보가 부족했어요.",
+            "unmeasured": [item["label"] for item in items],
+        }
     total = round(sum(item["score"] * item["weight"] for item in measured) / measured_weight)
     if off_topic:
         total = min(total, 58)          # 질문을 벗어난 답변은 다른 항목이 좋아도 통과하기 어렵다
 
     reliability = measured_weight / sum(item["weight"] for item in items)
+    # 질문 적합도·내용 구체성을 못 본 경우, 점수를 '전달력만 본 결과'로 표시한다
+    partial = any(not item["measured"] for item in items if item["key"] in SHARED_KEYS)
     weakest = min(measured, key=lambda item: item["score"])
     return {
+        "partial": partial,
         "mode": "음성" if is_voice else "텍스트",
         "rubric": "음성 채점표" if is_voice else "텍스트 채점표",
         "total": total,
@@ -486,18 +510,23 @@ def evaluate_answer(question, answer, metrics=None, profile=None, tag=None):
 def pass_rate_from(total, profile=None, reliability=1.0):
     """총점을 예상 합격률로 환산한다. 측정하지 못한 항목이 많으면 보수적으로 낮춘다."""
     rate = total * 0.82 + 4
-    if profile and profile.get("cover_letter"):
-        rate += 3
-    if profile and profile.get("certificates"):
-        rate += 2
+    if profile:
+        # '없음'이라고 적은 항목은 가산점으로 치지 않는다
+        import forms
+        if not forms.is_blank_or_none(profile.get("cover_letter")):
+            rate += 3
+        if not forms.is_blank_or_none(profile.get("certificates")):
+            rate += 2
     if reliability < 0.8:
-        rate -= (0.8 - reliability) * 25
+        # 확인하지 못한 항목이 많을수록 크게 낮춘다(모르는 것을 잘한 것으로 치지 않는다)
+        rate -= (0.8 - reliability) * 45
     return int(_clamp(round(rate), 12, 94))
 
 
 def summarize(answers, profile=None):
     """전체 답변의 총점·항목 평균·예상 합격률과 제출 방식별 결과를 만든다."""
-    scored = [answer["evaluation"] for answer in answers if answer.get("evaluation")]
+    scored = [answer["evaluation"] for answer in answers
+              if answer.get("evaluation") and answer["evaluation"].get("total") is not None]
     if not scored:
         return None
 
@@ -539,6 +568,7 @@ def summarize(answers, profile=None):
         "voice_avg": round(sum(item["total"] for item in voice) / len(voice)) if voice else None,
         "text_avg": round(sum(item["total"] for item in text) / len(text)) if text else None,
         "off_topic_count": sum(1 for item in scored if item["off_topic"]),
+        "partial_count": sum(1 for item in scored if item.get("partial")),
         "unmeasured": sorted({label for item in scored for label in item["unmeasured"]}),
         "best": max(items, key=lambda item: item["score"]) if items else None,
         "worst": min(items, key=lambda item: item["score"]) if items else None,

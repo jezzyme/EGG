@@ -913,26 +913,27 @@ def interview_page():
         answer_text = request.form.get("answer", "").strip()
         mode = "텍스트"
 
+        metrics = parse_voice_metrics(request.form.get("voice_metrics")) if is_voice else None
+
         if is_voice:
             mode = "음성"
             answer_text = request.form.get("speech_transcript", "").strip()
             audio_file = request.files.get("audio")
 
-            # 브라우저 받아쓰기 결과가 없으면 업로드된 녹음 파일을 서버에서 분석한다.
+            # 브라우저 받아쓰기 결과가 없으면 업로드된 녹음 파일을 서버에서 분석해 본다.
             if not answer_text and audio_file and audio_file.filename:
-                transcript, transcribe_error = transcribe_audio(audio_file)
+                transcript, _ = transcribe_audio(audio_file)
                 if transcript:
                     answer_text = transcript
-                else:
-                    return again(transcribe_error or "녹음 내용을 글로 옮기지 못했습니다. 다시 녹음해 주세요.")
 
-            if not answer_text:
-                return again("녹음에서 답변 내용을 찾지 못했습니다. 마이크 가까이에서 다시 말해 주세요.")
+            # 받아쓰기를 지원하지 않는 브라우저(아이폰 사파리·인앱 브라우저 등)에서도
+            # 녹음만 되었다면 답변으로 받는다. 내용 평가는 건너뛰고 전달력만 채점한다.
+            recorded = bool(metrics) and float(metrics.get("duration") or 0) >= 5
+            if not answer_text and not recorded:
+                return again("녹음이 확인되지 않았습니다. 다시 녹음하거나 텍스트로 답변해 주세요.")
 
-        if not answer_text:
+        elif not answer_text:
             return again("답변을 한두 문장이라도 적어주세요.")
-
-        metrics = parse_voice_metrics(request.form.get("voice_metrics")) if is_voice else None
         evaluation = scoring.evaluate_answer(questions[index]["text"], answer_text, metrics,
                                              profile, questions[index].get("tag"))
 

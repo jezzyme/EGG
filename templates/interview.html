@@ -280,6 +280,18 @@
         margin-top: 14px;
     }
 
+    .label-note {
+        font-weight: 400;
+        font-size: 11px;
+        color: var(--ink-faint);
+        margin-left: 4px;
+    }
+
+    #speech-transcript {
+        min-height: 90px;
+        font-size: 13.5px;
+    }
+
     .voice-transcript {
         margin-top: 14px;
         background: var(--yellow-mist);
@@ -384,9 +396,16 @@
                 <div class="level-hint"><span>작음</span><span id="level-hint">권장 구간</span><span>큼</span></div>
 
                 <audio id="voice-preview" controls hidden></audio>
-                <div class="voice-transcript" id="voice-transcript" hidden></div>
 
-                <input type="hidden" name="speech_transcript" id="speech-transcript">
+                <div id="transcript-box" hidden>
+                    <label for="speech-transcript" style="margin-top:14px;">
+                        말한 내용 <span class="label-note" id="transcript-note">자동으로 받아썼어요. 틀린 곳은 고쳐 주세요.</span>
+                    </label>
+                    <textarea name="speech_transcript" id="speech-transcript" rows="4"
+                              placeholder="말한 내용을 적어 주세요. 비워 두면 목소리 전달력만 평가합니다."></textarea>
+                    <div class="voice-note" id="transcript-hint"></div>
+                </div>
+
                 <input type="hidden" name="voice_metrics" id="voice-metrics">
                 <input type="file" name="audio" id="audio-input" accept="audio/*" hidden>
 
@@ -438,8 +457,10 @@
             const timerEl = document.getElementById('rec-timer');
             const dotEl = document.getElementById('rec-dot');
             const previewEl = document.getElementById('voice-preview');
-            const transcriptEl = document.getElementById('voice-transcript');
             const transcriptField = document.getElementById('speech-transcript');
+            const transcriptBox = document.getElementById('transcript-box');
+            const transcriptNote = document.getElementById('transcript-note');
+            const transcriptHint = document.getElementById('transcript-hint');
             const metricsField = document.getElementById('voice-metrics');
             const audioInput = document.getElementById('audio-input');
             const meterFill = document.getElementById('level-fill');
@@ -454,13 +475,13 @@
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 
-            // 받아쓰기를 지원하지 않는 브라우저에는 권장 안내를 경고로 바꿔 먼저 알려 준다
+            // 받아쓰기를 지원하지 않는 브라우저(아이폰 사파리·카카오톡 등 앱 안 브라우저)에 미리 알려 준다
             const browserNote = document.getElementById('browser-note');
             if (!SpeechRecognition && browserNote) {
                 browserNote.className = 'browser-note warn';
-                browserNote.innerHTML = '<span>⚠️</span><div><b class=\"t\">이 브라우저는 실시간 받아쓰기를 지원하지 않습니다.</b>' +
-                    'Chrome 또는 Edge에서 열면 말한 내용이 자동으로 글로 옮겨집니다. ' +
-                    '지금 브라우저에서도 녹음과 목소리 분석은 가능하지만, 답변 텍스트는 서버 음성 인식에 의존합니다.</div>';
+                browserNote.innerHTML = '<span>🎤</span><div><b class=\"t\">이 브라우저는 자동 받아쓰기를 지원하지 않아요.</b>' +
+                    '녹음과 목소리 평가(크기·떨림·길이)는 그대로 됩니다. 녹음을 마친 뒤 말한 내용을 직접 적으면 ' +
+                    '답변 내용까지 평가받을 수 있어요. <b>휴대폰 키보드의 🎤 버튼</b>을 쓰면 편합니다.</div>';
             }
             const FRAME_MS = 50;
             const SNR_SPEECH = 8;        // 소음 바닥보다 이만큼 크면 발화로 본다(dB)
@@ -515,21 +536,22 @@
                 return next === undefined ? sortedValues[base] : sortedValues[base] + rest * (next - sortedValues[base]);
             }
 
+            let userEdited = false;                 // 사용자가 직접 고쳤는지
+
+            transcriptField.addEventListener('input', function () {
+                userEdited = true;
+                updateSubmitState();
+            });
+
             function renderTranscript() {
-                transcriptField.value = finalText.trim();
-                if (!finalText && !interimText) {
-                    transcriptEl.hidden = true;
-                    transcriptEl.textContent = '';
-                    return;
-                }
-                transcriptEl.hidden = false;
-                transcriptEl.textContent = finalText;
-                if (interimText) {
-                    const span = document.createElement('span');
-                    span.className = 'interim';
-                    span.textContent = interimText;
-                    transcriptEl.appendChild(span);
-                }
+                if (userEdited) return;             // 직접 적은 내용을 덮어쓰지 않는다
+                transcriptField.value = (finalText + interimText).trim();
+            }
+
+            function updateSubmitState() {
+                // 녹음만 마쳤어도 제출할 수 있게 한다(받아쓰기가 안 되는 브라우저를 위해)
+                const recorded = !!metricsField.value;
+                submitBtn.disabled = !(recorded || transcriptField.value.trim());
             }
 
             // ===== 음향 측정 =====
@@ -821,9 +843,12 @@
                 confidenceCount = 0;
                 finalText = '';
                 interimText = '';
+                userEdited = false;
                 metricsField.value = '';
                 audioInput.value = '';
                 previewEl.hidden = true;
+                transcriptField.value = '';
+                transcriptBox.hidden = true;
                 renderTranscript();
 
                 recorder = new MediaRecorder(stream);
@@ -847,7 +872,16 @@
                     } catch (e) {
                         noteEl.textContent = '이 브라우저에서는 녹음 파일 전송이 제한되어, 받아쓰기 결과만 제출됩니다.';
                     }
-                    submitBtn.disabled = !(transcriptField.value || audioInput.files.length);
+                    transcriptBox.hidden = false;
+                    if (SpeechRecognition && transcriptField.value.trim()) {
+                        transcriptNote.textContent = '자동으로 받아썼어요. 틀린 곳은 고쳐 주세요.';
+                        transcriptHint.textContent = '';
+                    } else {
+                        transcriptNote.textContent = '(선택) 적지 않아도 제출할 수 있어요.';
+                        transcriptHint.textContent = '자동 받아쓰기가 되지 않았어요. 비워 두면 목소리 전달력만 평가하고, ' +
+                            '말한 내용을 적으면 질문 적합도와 내용 구체성까지 평가해 드려요. 휴대폰 키보드의 🎤 버튼을 쓰면 편합니다.';
+                    }
+                    updateSubmitState();
 
                     const summary = describe(measured);
                     statusEl.textContent = '녹음이 끝났어요' + (summary ? ' (' + summary + ')' : '') + '. 확인 후 "녹음 답변 제출"을 눌러 주세요.';
@@ -902,10 +936,13 @@
                 confidenceCount = 0;
                 finalText = '';
                 interimText = '';
+                userEdited = false;
                 metricsField.value = '';
                 audioInput.value = '';
                 previewEl.hidden = true;
                 previewEl.removeAttribute('src');
+                transcriptField.value = '';
+                transcriptBox.hidden = true;
                 renderTranscript();
                 submitBtn.disabled = true;
                 resetBtn.disabled = true;
